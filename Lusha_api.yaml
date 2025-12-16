@@ -1,0 +1,5281 @@
+openapi: 3.0.3
+info:
+  title: Lusha API
+  x-logo:
+    url: https://www.lusha.com/logo.png
+  description: >
+    Lusha provides a RESTful API that allows you to query a comprehensive
+    dataset of business profiles and company information.
+
+
+    All API requests should be made over HTTPS (SSL), and the response bodies
+    are delivered in JSON format.
+
+
+    ## Data Source and Privacy
+
+    Please note that **Lusha is a search platform**, meaning the data provided
+    is not created or directly managed by us. Instead, it is retrieved from
+    publicly available sources and through contributions from trusted business
+    partners.
+
+
+    For more information on how we collect, use, and handle business profiles,
+    please refer to our [Privacy
+    Policy](https://lusha.com/legal/privacy-notice/).
+
+
+    ## Authentication
+
+    To access the Lusha API, you must authenticate your requests using your API
+    key. This key is unique to your account and is used to identify your usage
+    of the API.
+
+
+    ### How to Authenticate
+
+    When making an API call, include your API key in the `api_key` header of the
+    request.
+
+
+    ### Important Notes
+
+    - To obtain your API key, please visit the following link:
+    https://dashboard.lusha.com/enrich/api
+
+    - Your API key is sensitive and should be kept private. **Do not share it**
+    with anyone outside of your organisation.
+
+    - The API key is used to track and manage your usage of the API, so **ensure
+    it is protected** from unauthorised access.
+
+
+    ## Available Endpoints
+
+    - **Person Enrichment**: Get contact information for individuals
+
+    - **Company Enrichment**: Get detailed company information
+
+    - **Prospecting**: Search and enrich contacts and companies based on
+    specific criteria
+
+    - **Account Management**: Monitor your API credit usage
+
+    - **Signals**: Retrieve signals data for contacts and companies
+
+    - **Recommendations**: Discover similar contacts and companies based on your
+    existing data
+
+
+    ## Rate Limiting
+
+    Lusha API enforces rate limiting to ensure fair usage and protect against
+    excessive load.
+
+
+    - **General Rate Limit**: You can make up to 25 requests per second to each
+    API endpoint
+
+    - **Credit Usage API**: Has a specific rate limit of 5 requests per minute
+
+    > **Note**: Rate limits may vary based on your account type and subscription
+    plan. 
+     If you're encountering rate limit issues frequently, please consult with your 
+     account manager or Lusha support team to discuss your specific needs.
+
+
+    ### Rate Limit Headers
+
+    To monitor your current rate limit status, check the HTTP response headers
+    in your API calls:
+
+
+    | Header | Description |
+
+    |--------|-------------|
+
+    | `x-rate-limit-daily` | The total number of requests allowed per day under
+    your current plan |
+
+    | `x-daily-requests-left` | The number of requests remaining in your daily
+    quota |
+
+    | `x-daily-usage` | The number of requests you have made in the current
+    daily period |
+
+    | `x-rate-limit-hourly` | The total number of requests allowed per hour
+    under your current plan |
+
+    | `x-hourly-requests-left` | The number of requests remaining in your hourly
+    quota |
+
+    | `x-hourly-usage` | The number of requests you have made in the current
+    hourly period |
+
+    | `x-rate-limit-minute` | The total number of requests allowed per minute
+    under your current plan |
+
+    | `x-minute-requests-left` | The number of requests remaining in your
+    current minute window |
+
+    | `x-minute-usage` | The number of requests you have made in the current
+    minute window |
+
+
+    ### Notes on API Rate Limiting
+
+    - If you exceed the rate limit, the API will return a 429 (Too Many
+    Requests) error.
+
+    - To ensure a smooth experience, respect the rate limits defined by your
+    subscription tier.
+
+    - Daily limits vary based on your billing plan — higher tiers have higher
+    quotas.
+
+    - You can programmatically track your usage through these response headers:
+      - `X-RateLimit-Remaining-Daily`
+      - `X-RateLimit-Reset-Daily`
+    - It is strongly recommended to implement logic that:
+      - Monitors these headers
+      - Pauses or retries requests accordingly
+      - Helps avoid hitting the limit and ensures reliable operation
+
+    ## Error Codes
+
+    Lusha API uses standard HTTP response codes to indicate the status of your
+    request. These codes help you understand whether the request was successful
+    or if there was an issue.
+
+
+    | Status Code | Name | Description |
+
+    |-------------|------|-------------|
+
+    | **200** | OK | Successful request |
+
+    | **400** | Bad Request | Badly formatted request |
+
+    | **401** | Unauthorized | The API key is invalid |
+
+    | **403** | Forbidden | Your account is not active. Please reach out to
+    support at *support@lusha.com* for assistance |
+
+    | **403** | Forbidden | Your pricing version does not support requesting
+    individual datapoints [revealEmails, revealPhones] |
+
+    | **404** | Not Found | The requested endpoint was not found |
+
+    | **412** | Precondition Failed | The request failed due to invalid syntax
+    that was provided. Please make sure to send a full name field that contains
+    a valid first & last name |
+
+    | **429** | Too Many Requests | You've reached your trial limit, please
+    contact support for upgrade |
+
+    | **429** | Too Many Requests | Daily API quota limit exceeded. Limit X
+    calls per day |
+
+    | **429** | Too Many Requests | Hourly API rate limit exceeded. Limit: X
+    calls per hour. Reset in X seconds |
+
+    | **451** | Unavailable For Legal Reasons | We are unable to process this
+    contact request due to our GDPR regulations |
+
+    | **499** | Client Closed Request | Request failed due to request timeout |
+
+    | **5XX** | Server Error | There's a problem on Lusha's end |
+
+
+    ### Error Response Format
+
+    In case of an error, the response body will contain details about the error:
+
+
+    ```json
+
+    {
+      "error": {
+        "code": 400,
+        "message": "Invalid request parameters"
+      }
+    }
+
+    ```
+
+
+    ### Handling Errors
+
+    - Always ensure your API key is correct and valid
+
+    - Pay attention to the specific error message and code to troubleshoot
+    issues efficiently
+
+    - Implement proper error handling and retry logic in your application
+
+    - For 5XX errors, implement exponential backoff before retrying
+
+        ---
+  contact:
+    name: Lusha Support
+    url: https://api.lusha.com
+    email: support@lusha.com
+  termsOfService: https://lusha.com/legal/terms
+  x-privacy-policy:
+    name: Privacy Policy
+    url: https://lusha.com/legal/privacy-notice/
+servers:
+  - url: https://api.lusha.com
+    description: Production server
+security:
+  - ApiKeyAuth: []
+tags:
+  - name: Person Enrichment
+    description: >-
+      The Person API allows you to look up detailed information about a person
+      using various identifiers, such as their email, LinkedIn URL, full name,
+      company name, or company domain. You can retrieve key data points like
+      Location, Email, Phone number, Social network URLs.
+  - name: Company Enrichment
+    description: >-
+      The Company API provides comprehensive business intelligence about
+      organizations worldwide.  Retrieve detailed company profiles including
+      firmographics, financial data, technology stacks,  intent signals, and
+      real-time growth indicators.
+  - name: Prospecting
+    description: >
+      With Lusha's Prospecting API, you can query Lusha's extensive database
+      based on specific criteria (such as job title, seniority, location, and
+      more) to retrieve detailed contact and company information.
+
+
+      The Prospecting API is designed to help you generate new records (contacts
+      or leads) for your CRM system, using filters that align with your Ideal
+      Customer Profile (ICP).
+
+
+      This process involves three main steps:
+
+
+      | Step | API | Description |
+
+      |------|-----|-------------|
+
+      | 1 | **Filters API** | Apply filters to refine your search |
+
+      | 2 | **Search API** | Query Contacts or Companies using the available
+      filters |
+
+      | 3 | **Enrich API** | Get full details of Contacts and Companies from the
+      search results |
+
+
+
+      **Important Notes:**
+
+      - The API KEY header is mandatory for every request to our service.
+    x-tag-expanded: true
+  - name: Contact Filters
+    description: Available filters for contact searches
+    x-parent-tag: Prospecting
+  - name: Company Filters
+    description: Available filters for company searches
+    x-parent-tag: Prospecting
+  - name: Contact Search & Enrich
+    description: Search and enrich contact data
+    x-parent-tag: Prospecting
+  - name: Company Search & Enrich
+    description: Search and enrich company data
+    x-parent-tag: Prospecting
+  - name: Account Management
+    description: Manage your account and monitor usage
+  - name: Signal Filters
+    description: Get available signal options
+    x-parent-tag: Signals
+  - name: Signals
+    description: >-
+      With Lusha’s Signals API, you can enrich your contacts and companies with
+      timely insights that highlight key account and prospect changes. Signals
+      help you identify moments of opportunity - from job moves and promotions
+      to company growth and new initiatives - so you can engage prospects and
+      customers at exactly the right time. Easily integrate signal data into
+      enrichment flows, CRM systems, or automation workflows to keep pipelines
+      and customer records always up to date.
+    x-tag-expanded: true
+  - name: Recommendations
+    description: >-
+      Lusha's Recommendations API helps you discover similar contacts and
+      companies based on your existing data. Get AI-powered suggestions for new
+      prospects that match your ideal customer profile.
+    x-tag-expanded: true
+  - name: Contact Recommendations
+    description: Get recommendations for similar contacts
+    x-parent-tag: Recommendations
+  - name: Company Recommendations
+    description: Get recommendations for similar companies
+    x-parent-tag: Recommendations
+paths:
+  /v2/person:
+    get:
+      tags:
+        - Person Enrichment
+      summary: Search Single Contact
+      description: >
+        Find and enrich a single contact using various search criteria. You can
+        search by name, email, 
+
+        LinkedIn URL, or company information.
+
+        >##### Endpoint
+          ```
+        GET https://api.lusha.com/v2/person
+          ```
+
+
+        >##### Search Requirements
+          
+        You must provide either:
+
+        - `email` OR
+
+        - `linkedinUrl` OR
+
+        - `firstName` AND `lastName` AND (`companyName` OR `companyDomain`)
+
+
+        >##### Notes: 
+
+        - Provide as much information as possible for better results
+
+        - Use `refreshJobInfo=true` to get the latest employment data
+
+        - Use `filterBy` parameter to specify what contact details you need
+
+        - Include the `signals` parameter to retriever contact signals (If no
+        signals data is found for the specified period, the `signals` object
+        will be empty but still present in the response.)
+          - When requesting signals, you can optionally specify a start date using `signalsStartDate`.
+          - Signals data is optional. If you don't include the `signals` parameter, no signals data will be returned.
+
+        ---
+
+
+        ⚠️ **Important Notice - Unified Credits Plan Required**
+
+
+        | Parameter | Requirement |
+
+        |-----------|-------------|
+
+        | `revealEmails` and `revealPhones` | Only available to customers on the
+        **Unified Credits** pricing plan |
+
+        | Plan Restriction | Attempting to use these parameters on other plans
+        will result in a **403 Unauthorized** error |
+
+        | Default Behavior | When neither parameter is used, the API returns
+        **both email addresses and phone numbers**, if available |
+
+
+        ---
+      operationId: searchSingleContact
+      parameters:
+        - $ref: '#/components/parameters/firstName'
+        - $ref: '#/components/parameters/lastName'
+        - $ref: '#/components/parameters/companyName'
+        - $ref: '#/components/parameters/companyDomain'
+        - $ref: '#/components/parameters/email'
+        - $ref: '#/components/parameters/linkedinUrl'
+        - $ref: '#/components/parameters/refreshJobInfo'
+        - $ref: '#/components/parameters/filterBy'
+        - $ref: '#/components/parameters/revealEmails'
+        - $ref: '#/components/parameters/revealPhones'
+        - $ref: '#/components/parameters/signals'
+        - $ref: '#/components/parameters/signalsStartDate'
+        - $ref: '#/components/parameters/partialProfile'
+      responses:
+        '200':
+          description: Successfully found contact information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleContactResponse'
+              examples:
+                successful_response:
+                  summary: Successful contact lookup
+                  value:
+                    contact:
+                      error: null
+                      isCreditCharged: false
+                      data:
+                        companyId: 33222678
+                        firstName: Dustin
+                        lastName: Moskovitz
+                        fullName: Dustin Moskovitz
+                        emailAddresses:
+                          - address: dustin@lusha.com
+                            type: work
+                            emailConfidence: A+
+                            updateDate: '2024-01-15'
+                        phoneNumbers:
+                          - number: +1-555-123-4567
+                            phoneType: Mobile
+                            doNotCall: false
+                            updateDate: '2024-01-15'
+                        location:
+                          country: United States
+                          countryIso2: US
+                          continent: North America
+                          rawLocation: Boston, MA, US
+                          city: Boston
+                          state: Massachusetts
+                          stateCode: MA
+                          isEuContact: false
+                        jobTitle:
+                          seniority: Executive
+                          title: CEO
+                          departments:
+                            - Executive
+                        socialLinks:
+                          linkedin: https://www.linkedin.com/in/dustin/
+                        jobStartDate: '2020-01-01'
+                        personId: 123456
+                        updateDate: '2024-01-15'
+                        company:
+                          name: Lusha
+                          description: >-
+                            Lusha is the sales intelligence platform designed to
+                            help businesses get their next customers.
+                          domains:
+                            homepage: https://www.lusha.com
+                            email: lusha.com
+                          fqdn: lusha.com
+                          location:
+                            country: United States
+                            countryIso2: US
+                            continent: North America
+                            rawLocation: Boston, MA, US
+                            city: Boston
+                            state: Massachusetts
+                          companySize:
+                            - 201
+                            - 500
+                          revenueRange:
+                            - 10000000
+                            - 50000000
+                          logoUrl: https://logo.lusha.co/logo.jpg
+                          social:
+                            linkedin: https://linkedin.com/company/lusha
+                            crunchbase: https://crunchbase.com/company/lusha
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '451':
+          $ref: '#/components/responses/GDPRRestricted'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Person Enrichment
+      summary: Search Multiple Contacts
+      description: >
+        Enrich multiple contacts in a single request. This endpoint allows you
+        to submit a list of contacts 
+
+        and receive enriched data for each one, including company information.
+
+
+        >##### Endpoint:
+          ```
+        POST https://api.lusha.com/v2/person
+          ```
+
+
+        >##### Notes
+          - You can process up to 100 contacts per request.
+          - At least one of `email`, `linkedinUrl`, or `company`/`domain` with `fullName` is required. 
+
+          
+        ---
+
+
+        ⚠️ **Important Notice - Unified Credits Plan Required**
+
+
+        | Parameter | Requirement |
+
+        |-----------|-------------|
+
+        | `revealEmails` and `revealPhones` | Only available to customers on the
+        **Unified Credits** pricing plan |
+
+        | Plan Restriction | Attempting to use these parameters on other plans
+        will result in a **403 Unauthorized** error |
+
+        | Default Behavior | When neither parameter is used, the API returns
+        **both email addresses and phone numbers**, if available |
+
+
+        ---
+      operationId: searchMultipleContacts
+      requestBody:
+        required: true
+        description: The list of contacts to enrich
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchBulkContactsRequest'
+            examples:
+              successful_response:
+                summary: Successful contact lookup
+                value:
+                  contacts:
+                    - contactId: '1'
+                      fullName: John Doe
+                      email: john@example.com
+                      companies:
+                        - name: Example Corp
+                          domain: example.com
+                          isCurrent: true
+                    - contactId: '2'
+                      linkedinUrl: https://www.linkedin.com/in/carolinaportela/
+                  metadata:
+                    revealEmails: true
+                    revealPhones: true
+                    signals:
+                      - promotion
+                      - companyChange
+                    signalsStartDate: '2025-03-01'
+                    partialProfile: true
+      responses:
+        '200':
+          description: The list of enriched contacts with their company details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkPersonResponse'
+              example:
+                contacts:
+                  '1':
+                    error: null
+                    isCreditCharged: false
+                    data:
+                      firstName: John
+                      lastName: Doe
+                      fullName: John Doe
+                      companyId: 1586
+                      contactTags: []
+                      emails:
+                        - john.doe@amazon.com
+                        - johndoe@gmail.com
+                      emailAddresses:
+                        - email: john.doe@amazon.com
+                          emailType: work
+                          updateDate: '2025-11-17'
+                          emailConfidence: A+
+                        - email: johndoe@gmail.com
+                          emailType: private
+                          updateDate: '2025-11-17'
+                          emailConfidence: A+
+                      phones:
+                        - +1 555-123-4567
+                      phoneNumbers:
+                        - number: +1 555-123-4567
+                          phoneType: direct
+                          doNotCall: false
+                          updateDate: '2025-11-17'
+                      personId: 1312840528
+                      location:
+                        country: United States
+                        country_iso2: US
+                        continent: North America
+                        is_eu_contact: false
+                        state: Massachusetts
+                        state_code: MA
+                        city: Boston
+                        city_id: 4930956
+                        location_coordinates:
+                          - -71.05976867675781
+                          - 42.358428955078125
+                      jobTitle:
+                        title: Engineering Manager
+                        departments:
+                          - Engineering & Technical
+                        seniority: Manager
+                      socialLinks:
+                        linkedin: https://www.linkedin.com/in/johndoe
+                      jobStartDate: '2022-03-01'
+                      previousJob:
+                        company:
+                          name: TechCorp
+                          domain: techcorp.com
+                        jobTitle:
+                          title: Senior Software Engineer
+                          departments:
+                            - Engineering & Technical
+                      updateDate: '2025-11-17'
+                  '2':
+                    error: null
+                    isCreditCharged: false
+                    data:
+                      firstName: Jane
+                      lastName: Smith
+                      fullName: Jane Smith
+                      companyId: 33222678
+                      contactTags: []
+                      emails:
+                        - jane.smith@lusha.com
+                      emailAddresses:
+                        - email: jane.smith@lusha.com
+                          emailType: work
+                          updateDate: '2025-11-18'
+                          emailConfidence: A+
+                      phones: []
+                      phoneNumbers: []
+                      personId: 3965070011
+                      location:
+                        country: United States
+                        country_iso2: US
+                        continent: North America
+                        is_eu_contact: false
+                      jobTitle:
+                        title: Solutions Engineer
+                        departments:
+                          - Engineering & Technical
+                        seniority: Non-Manager
+                      socialLinks:
+                        linkedin: https://www.linkedin.com/in/janesmith
+                      jobStartDate: '2022-10-17'
+                      previousJob:
+                        company: {}
+                        jobTitle: {}
+                      updateDate: '2025-11-18'
+                companies:
+                  '1586':
+                    name: Amazon
+                    description: >-
+                      Amazon is guided by four principles: customer obsession
+                      rather than competitor focus, passion for invention,
+                      commitment to operational excellence, and long-term
+                      thinking. We are driven by the excitement of building
+                      technologies, inventing products, and providing services
+                      that change lives. We embrace new ways of doing things,
+                      make decisions quickly, and are not afraid to fail. We
+                      have the scope and capabilities of a large company, and
+                      the spirit and heart of a small one.
+
+
+                      Together, Amazonians research and develop new technologies
+                      from Amazon Web Services to Alexa on behalf of our
+                      customers: shoppers, sellers, content creators, and
+                      developers around the world.
+
+
+                      Our mission is to be Earth's most customer-centric
+                      company. Our actions, goals, projects, programs, and
+                      inventions begin and end with the customer top of mind.
+
+
+                      You'll also hear us say that at Amazon, it's always "Day
+                      1." What do we mean? That our approach remains the same as
+                      it was on Amazon's very first day - to make smart, fast
+                      decisions, stay nimble, invent, and focus on delighting
+                      our customers.
+                    domains:
+                      homepage: amazon.com
+                      email: amazon.com
+                    homepageUrl: https://amazon.com
+                    fqdn: www.amazon.com
+                    location:
+                      city: Seattle
+                      continent: North America
+                      country: United States
+                      rawLocation: 2127 7th Ave.; Seattle, WA 98109, US
+                      countryIso2: US
+                      state: Washington
+                      stateCode: WA
+                      locationCoordinates:
+                        - -122.33206939697266
+                        - 47.60620880126953
+                    companySize:
+                      - 100001
+                      - 10000000
+                    revenueRange:
+                      - 1000000000
+                      - 10000000000
+                    logoUrl: https://logo.lusha.co/amazon-logo.jpg
+                    social:
+                      linkedin: https://www.linkedin.com/company/amazon
+                      crunchbase: https://www.crunchbase.com/organization/amazon
+                    specialities:
+                      - ecommerce
+                      - internet of things platform
+                      - operations
+                      - retail
+                    technologies: null
+                    funding: null
+                    intent:
+                      detectedTopics:
+                        - topicName: Model Based Systems Engineering (MBSE)
+                          metadata:
+                            topicScore: 82
+                            topicTrend: '-4'
+                      topicCount: 1
+                    mainIndustry: Technology, Information & Media
+                    subIndustry: E-Commerce & Marketplace
+                    industryPrimaryGroupDetails:
+                      sics:
+                        - sic: 5961
+                          description: Catalog and mail-order houses
+                  '33222678':
+                    name: Lusha
+                    description: >-
+                      Lusha is the leader in Sales Streaming – a new sales
+                      paradigm that streams top leads straight to salespeople
+                      and handles all the outreach, so they can escape the lead
+                      grind and just sell.
+
+
+                      Lusha's Sales Streaming Platform is built around Sales
+                      Playlists that continuously fill up with their ideal
+                      prospects – think "Spotify for sales." With AI doing the
+                      heavy lifting, Lusha uncovers great-fit leads salespeople
+                      never knew existed and executes tailored, perfectly timed
+                      cadences that get meetings booked. And the more you use
+                      Lusha, the smarter it gets.
+
+
+                      With Sales Streaming, salespeople spend most of their time
+                      face-to-face with relevant prospects, driving 4-6X more
+                      business.
+                    domains:
+                      homepage: lusha.com
+                      email: lusha.com
+                    homepageUrl: https://lusha.com
+                    fqdn: www.lusha.com
+                    location:
+                      city: Boston
+                      continent: North America
+                      country: United States
+                      rawLocation: >-
+                        800 Boylston St; Suite 1410; Boston, Massachusetts
+                        02199, US
+                      countryIso2: US
+                      state: Massachusetts
+                      stateCode: MA
+                      locationCoordinates:
+                        - -71.05976867675781
+                        - 42.358428955078125
+                    companySize:
+                      - 201
+                      - 500
+                    revenueRange: []
+                    logoUrl: https://logo.lusha.co/lusha-logo.jpg
+                    social:
+                      linkedin: https://www.linkedin.com/company/lushadata
+                      crunchbase: https://www.crunchbase.com/organization/lusha
+                    specialities:
+                      - data accuracy
+                      - data availability
+                      - data enrichment
+                      - inside sales
+                      - lead capture
+                      - lead gen
+                      - lead generation
+                      - lead generation software
+                      - lead intelligence
+                      - lead mining
+                      - lead nurturing
+                      - prospecting
+                      - sales enablement
+                      - sales intelligence
+                    technologies: null
+                    funding:
+                      rounds:
+                        - currency: USD
+                          roundAmount: 205000000
+                          roundType: Private Equity Round
+                          roundDate: Nov 10, 2021
+                        - currency: USD
+                          roundAmount: 40000000
+                          roundType: Private Equity Round
+                          roundDate: Feb 10, 2021
+                      totalRounds: 2
+                      totalRoundsAmount: 245000000
+                      currency: USD
+                      isIpo: false
+                      lastRoundType: Private Equity Round
+                      lastRoundAmount: 205000000
+                      lastRoundDate: Nov 10, 2021
+                    intent:
+                      detectedTopics:
+                        - topicName: HIPAA Compliance
+                          metadata:
+                            topicScore: 78
+                            topicTrend: '-3'
+                        - topicName: Software Development Lifecycle
+                          metadata:
+                            topicScore: 74
+                            topicTrend: '-1'
+                        - topicName: Asana
+                          metadata:
+                            topicScore: 72
+                            topicTrend: New
+                        - topicName: Agile Transformation
+                          metadata:
+                            topicScore: 71
+                            topicTrend: '+7'
+                        - topicName: Rally Software
+                          metadata:
+                            topicScore: 70
+                            topicTrend: '+8'
+                        - topicName: VersionOne
+                          metadata:
+                            topicScore: 70
+                            topicTrend: '-10'
+                      topicCount: 6
+                    mainIndustry: Technology, Information & Media
+                    subIndustry: Software Development
+                    industryPrimaryGroupDetails:
+                      sics:
+                        - sic: 7371
+                          description: Custom computer programming services
+                      naics:
+                        - naics: 541511
+                          description: Custom Computer Programming Services
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v2/company:
+    get:
+      tags:
+        - Company Enrichment
+      summary: Search Single Company
+      description: >
+        Find detailed information about a single company by using different
+        paramaters.
+
+        >##### Endpoint:
+          ```
+        GET https://api.lusha.com/v2/company
+          ```
+
+        >##### Notes: 
+          - At least one of `domain`, `company`, or `companyId` is required. 
+      operationId: searchSingleCompanyV2
+      parameters:
+        - name: domain
+          in: query
+          description: The domain name associated with the company
+          schema:
+            type: string
+          example: example.com
+        - name: company
+          in: query
+          description: The name of the company
+          schema:
+            type: string
+          example: Lusha
+        - name: companyId
+          in: query
+          description: |
+            A unique identifier for a Lusha company.
+          schema:
+            type: string
+          example: '1234567890'
+        - name: signals
+          in: query
+          description: >
+            Array of signal types to retrieve for the company.
+
+            - `allSignals`: All available signal types
+
+            - `headcountGrowth`: Company size changes
+
+            - `newJobsOpen`: New job openings
+
+            - `newsEvent`: Company related events
+
+
+            > See [Signal
+            Filters](https://docs.lusha.com/apis/openapi/signal-filters/getsignaloptions)
+            for complete details on available signals and their categories
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - allSignals
+                - headcountGrowth
+                - newJobsOpen
+                - newsEvent
+            example:
+              - headcountGrowth
+              - newJobsOpen
+        - name: signalsStartDate
+          in: query
+          description: >
+            Start date for signal retrieval in YYYY-MM-DD format. Defaults to 6
+            months ago if not specified.
+          schema:
+            type: string
+            format: date
+            example: '2025-03-01'
+        - name: partialCompany
+          in: query
+          description: |
+            Expand coverage with partial company profiles
+          schema:
+            type: boolean
+            default: true
+            example: false
+      responses:
+        '200':
+          description: Company information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanySingleResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Company Enrichment
+      summary: Search Multiple Companies
+      description: >
+        Search for multiple companies in a single request. Provide a list of
+        companies with 
+
+        identifiers like domain names or company IDs.
+
+        >##### Endpoint:
+          ```
+        POST https://api.lusha.com/bulk/company/v2
+          ```
+
+
+        >##### Notes: 
+          - At least one of `domain`, `company`, or `companyId` is required. 
+          - You can process up to 100 companies per request.
+      operationId: searchMultipleCompaniesV2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompaniesBulkRequest'
+            example:
+              companies:
+                - id: '1'
+                  name: Lusha
+                - id: '2'
+                  domain: google.com
+      responses:
+        '200':
+          description: Bulk company search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompaniesBulkResponse'
+              example:
+                '1':
+                  id: 33222678
+                  lushaCompanyId: '16303253'
+                  name: Lusha
+                  companySize:
+                    - 201
+                    - 500
+                  fqdn: www.lusha.com
+                  founded: '2016'
+                  description: >-
+                    Lusha is the leader in Sales Streaming – a new sales
+                    paradigm that streams top leads straight to salespeople and
+                    handles all the outreach, so they can escape the lead grind
+                    and just sell.
+
+
+                    Lusha's Sales Streaming Platform is built around Sales
+                    Playlists that continuously fill up with their ideal
+                    prospects – think "Spotify for sales." With AI doing the
+                    heavy lifting, Lusha uncovers great-fit leads salespeople
+                    never knew existed and executes tailored, perfectly timed
+                    cadences that get meetings booked. And the more you use
+                    Lusha, the smarter it gets.
+
+
+                    With Sales Streaming, salespeople spend most of their time
+                    face-to-face with relevant prospects, driving 4-6X more
+                    business.
+                  logoUrl: >-
+                    https://logo.lusha.co/brightdata/year=2024/month=05/day=03/j_lvq47h0g13te1b3wpu.e7b0795e7affc9953dadd43e6fce99a2c5260043.file_lvq4cfwv17kcb9m4ej.logo_cached.jpg
+                  industryPrimaryGroupDetails:
+                    sics:
+                      - sic: 7371
+                        description: Custom computer programming services
+                    naics:
+                      - naics: 541511
+                        description: Custom Computer Programming Services
+                  linkedin: https://www.linkedin.com/company/lushadata
+                  mainIndustry: Technology, Information & Media
+                  subIndustry: Software Development
+                  city: Boston
+                  state: Massachusetts
+                  country: United States
+                  countryIso2: US
+                  continent: North America
+                  rawLocation: 800 Boylston St; Suite 1410; Boston, Massachusetts 02199, US
+                  crunchbase: https://www.crunchbase.com/organization/lusha
+                  specialities:
+                    - data accuracy
+                    - data availability
+                    - data enrichment
+                    - inside sales
+                    - lead capture
+                    - lead gen
+                    - lead generation
+                    - lead generation software
+                    - lead intelligence
+                    - lead mining
+                    - lead nurturing
+                    - prospecting
+                    - sales enablement
+                    - sales intelligence
+                  funding:
+                    rounds:
+                      - currency: USD
+                        roundAmount: 205000000
+                        roundType: Private Equity Round
+                        roundDate: Nov 10, 2021
+                      - currency: USD
+                        roundAmount: 40000000
+                        roundType: Private Equity Round
+                        roundDate: Feb 10, 2021
+                    totalRounds: 2
+                    totalRoundsAmount: 245000000
+                    currency: USD
+                    isIpo: false
+                    lastRoundType: Private Equity Round
+                    lastRoundAmount: 205000000
+                    lastRoundDate: Nov 10, 2021
+                  intent:
+                    detectedTopics:
+                      - topicName: HIPAA Compliance
+                        metadata:
+                          topicScore: 78
+                          topicTrend: '-3'
+                      - topicName: Software Development Lifecycle
+                        metadata:
+                          topicScore: 74
+                          topicTrend: '-1'
+                      - topicName: Asana
+                        metadata:
+                          topicScore: 72
+                          topicTrend: New
+                      - topicName: Agile Transformation
+                        metadata:
+                          topicScore: 71
+                          topicTrend: '+7'
+                      - topicName: Rally Software
+                        metadata:
+                          topicScore: 70
+                          topicTrend: '+8'
+                      - topicName: VersionOne
+                        metadata:
+                          topicScore: 70
+                          topicTrend: '-10'
+                    topicCount: 6
+                '2':
+                  id: 1441
+                  lushaCompanyId: '10117615'
+                  name: Google
+                  companySize:
+                    - 100001
+                    - 10000000
+                  revenueRange:
+                    - 1000000000
+                    - 10000000000
+                  fqdn: www.google.com
+                  description: >-
+                    A problem isn't truly solved until it's solved for all.
+                    Googlers build products that help create opportunities for
+                    everyone, whether down the street or across the globe. Bring
+                    your insight, imagination and a healthy disregard for the
+                    impossible. Bring everything that makes you unique.
+                    Together, we can build for everyone.
+
+
+                    Check out our career opportunities at goo.gle/3DLEokh
+                  logoUrl: >-
+                    https://logo.lusha.co/coresignal/202405/c/82/c822c1b63853ed273b89687ac505f9fa
+                  industryPrimaryGroupDetails:
+                    sics:
+                      - sic: 7372
+                        description: Prepackaged software
+                    naics:
+                      - naics: 513210
+                        description: Software Publishers
+                  linkedin: https://www.linkedin.com/company/google
+                  mainIndustry: Technology, Information & Media
+                  subIndustry: Software Development
+                  city: Mountain View
+                  state: California
+                  country: United States
+                  countryIso2: US
+                  continent: North America
+                  rawLocation: 1600 Amphitheatre Parkway; Mountain View, CA 94043, US
+                  crunchbase: https://www.crunchbase.com/organization/g-pay
+                  specialities:
+                    - ads
+                    - android
+                    - apps
+                    - artificial intelligence agents
+                    - cloud
+                    - hardware
+                    - machine learning
+                    - mobile
+                    - online video
+                    - search
+                    - software
+                    - virtual reality
+                    - youtube channel
+                  intent:
+                    detectedTopics:
+                      - topicName: Rally Software
+                        metadata:
+                          topicScore: 70
+                          topicTrend: '-6'
+                      - topicName: Deel, Inc.
+                        metadata:
+                          topicScore: 70
+                          topicTrend: '-8'
+                      - topicName: GitHub Enterprise
+                        metadata:
+                          topicScore: 70
+                          topicTrend: '-3'
+                    topicCount: 3
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /prospecting/filters/contacts/departments:
+    get:
+      tags:
+        - Contact Filters
+      summary: Departments
+      description: Get list of available departments for contact filtering
+      operationId: getContactDepartments
+      responses:
+        '200':
+          description: List of departments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+              example:
+                - Business Development
+                - Consulting
+                - Engineering
+                - Marketing
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /prospecting/filters/contacts/seniority:
+    get:
+      tags:
+        - Contact Filters
+      summary: Seniority
+      description: Get list of available seniority levels for contact filtering
+      operationId: getContactSeniority
+      responses:
+        '200':
+          description: List of seniority levels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+              example:
+                - id: 10
+                  name: founder
+                - id: 9
+                  name: c-suite
+                - id: 8
+                  name: vice president
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /prospecting/filters/contacts/existing_data_points:
+    get:
+      tags:
+        - Contact Filters
+      summary: Data Points
+      description: Get list of available data points for contact filtering
+      operationId: getContactDataPoints
+      responses:
+        '200':
+          description: List of data points
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+              example:
+                - phone
+                - work_email
+                - mobile_phone
+                - direct_phone
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /prospecting/filters/contacts/all_countries:
+    get:
+      tags:
+        - Contact Filters
+      summary: Countries
+      description: Get list of all available countries for contact filtering
+      operationId: getContactCountries
+      responses:
+        '200':
+          description: List of countries with codes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CountryFilter'
+              example:
+                - name: United States
+                  code: US
+                - name: United Kingdom
+                  code: GB
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /prospecting/filters/contacts/locations:
+    post:
+      tags:
+        - Contact Filters
+      summary: Locations
+      description: Search for locations by text for contact filtering
+      operationId: searchContactLocations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationSearchRequest'
+            example:
+              text: un
+      responses:
+        '200':
+          description: Matching locations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LocationFilter'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /prospecting/filters/companies/names:
+    post:
+      tags:
+        - Company Filters
+      summary: Names
+      description: Search for company names by text
+      operationId: searchCompanyNames
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyNameSearchRequest'
+            example:
+              text: lusha
+      responses:
+        '200':
+          description: Matching companies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CompanyNameResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /prospecting/filters/companies/industries_labels:
+    get:
+      tags:
+        - Company Filters
+      summary: Industries
+      description: Get list of available industries for company filtering
+      operationId: getCompanyIndustries
+      responses:
+        '200':
+          description: Industry hierarchy
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IndustryLabel'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /prospecting/filters/companies/sizes:
+    get:
+      tags:
+        - Company Filters
+      summary: Sizes
+      description: Get list of available company size ranges
+      operationId: getCompanySizes
+      responses:
+        '200':
+          description: Company size ranges
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CompanySizeRange'
+              example:
+                - min: 1
+                  max: 10
+                - min: 11
+                  max: 50
+                - min: 51
+                  max: 200
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /prospecting/filters/companies/revenues:
+    get:
+      tags:
+        - Company Filters
+      summary: Revenues
+      description: Get list of available revenue ranges
+      operationId: getCompanyRevenues
+      responses:
+        '200':
+          description: Revenue ranges
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RevenueRange'
+              example:
+                - min: 1
+                  max: 1000000
+                - min: 1000001
+                  max: 10000000
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /prospecting/filters/companies/locations:
+    post:
+      tags:
+        - Company Filters
+      summary: Locations
+      description: Search for company locations by text
+      operationId: searchCompanyLocations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationSearchRequest'
+            example:
+              text: Israel
+      responses:
+        '200':
+          description: Matching locations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CompanyLocationFilter'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /prospecting/filters/companies/sics:
+    get:
+      tags:
+        - Company Filters
+      summary: SIC Codes
+      description: Get list of available SIC codes
+      operationId: getCompanySicCodes
+      responses:
+        '200':
+          description: SIC codes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SicCode'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /prospecting/filters/companies/naics:
+    get:
+      tags:
+        - Company Filters
+      summary: NAICS Codes
+      description: Get list of available NAICS codes
+      operationId: getCompanyNaicsCodes
+      responses:
+        '200':
+          description: NAICS codes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NaicsCode'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /prospecting/filters/companies/intent_topics:
+    get:
+      tags:
+        - Company Filters
+      summary: Intent Topics
+      description: Get list of available intent topics
+      operationId: getCompanyIntentTopics
+      responses:
+        '200':
+          description: Intent topics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+              example:
+                - Android
+                - Accounting
+                - Zero Trust
+                - Digital Sales
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /prospecting/filters/companies/technologies:
+    post:
+      tags:
+        - Company Filters
+      summary: Technologies
+      description: Search for technologies by text
+      operationId: searchCompanyTechnologies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TechnologySearchRequest'
+            example:
+              text: rss
+      responses:
+        '200':
+          description: Matching technologies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Technology'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /prospecting/contact/search:
+    post:
+      tags:
+        - Contact Search & Enrich
+      summary: Search Contacts
+      description: >
+        Search for contacts using various filters. This is step 2 of the
+        prospecting process.
+
+
+        *Endpoint*: **(POST)  https://api.lusha.com/prospecting/contact/search**
+      operationId: searchProspectingContacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactSearchRequest'
+            examples:
+              basicContactSearch:
+                summary: Basic contact search with filters
+                value:
+                  pages:
+                    page: 0
+                    size: 20
+                  filters:
+                    contacts:
+                      include:
+                        departments:
+                          - Engineering & Technical
+                          - Marketing
+                        seniority:
+                          - '4'
+                          - '5'
+                        existing_data_points:
+                          - phone
+                          - work_email
+                          - mobile_phone
+                        locations:
+                          - continent: North America
+                            country: United States
+                            city: New York
+                            state: New York
+                            country_grouping: na
+                      exclude:
+                        departments:
+                          - Human Resources
+                    companies:
+                      include:
+                        names:
+                          - Apple
+                          - Microsoft
+                        locations:
+                          - country: United States
+                        technologies:
+                          - Salesforce
+                          - Amazon Web Services
+                        mainIndustriesIds:
+                          - 4
+                          - 5
+                        subIndustriesIds:
+                          - 101
+                        intentTopics:
+                          - Digital Sales
+                        sizes:
+                          - min: 100
+                            max: 1000
+                        revenues:
+                          - min: 10000000
+                            max: 100000000
+                        sicCodes:
+                          - '1011'
+                          - '1021'
+                        naicsCodes:
+                          - '11'
+                          - '21'
+                      exclude: {}
+              simpleExample:
+                summary: Simple search example
+                value:
+                  pages:
+                    page: 0
+                    size: 10
+                  filters:
+                    contacts:
+                      include:
+                        departments:
+                          - Sales
+              withSearchText:
+                summary: Contact search with searchText filter
+                value:
+                  pages:
+                    page: 0
+                    size: 50
+                  filters:
+                    contacts:
+                      include:
+                        searchText: Amit
+                        departments:
+                          - Engineering & Technical
+                      exclude:
+                        searchText: Ronen
+                    companies:
+                      include:
+                        searchText: finance marketing in Germany DE
+      responses:
+        '200':
+          description: Search results with contact IDs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactSearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /prospecting/contact/enrich:
+    post:
+      tags:
+        - Contact Search & Enrich
+      summary: Enrich Contacts
+      description: >
+        Enrich contacts from search results. This is step 3 of the prospecting
+        process.
+
+          *Endpoint*: **(POST)  https://api.lusha.com/prospecting/contact/enrich**       
+        ---
+
+
+        ⚠️ **Important Notice - Unified Credits Plan Required**
+
+
+        | Parameter | Requirement |
+
+        |-----------|-------------|
+
+        | `revealEmails` and `revealPhones` | Only available to customers on the
+        **Unified Credits** pricing plan |
+
+        | Plan Restriction | Attempting to use these parameters on other plans
+        will result in a **403 Unauthorized** error |
+
+        | Default Behavior | When neither parameter is used, the API returns
+        **both email addresses and phone numbers**, if available |
+
+
+        ---
+      operationId: enrichProspectingContacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactEnrichRequest'
+            examples:
+              basicExample:
+                summary: Basic enrichment request
+                value:
+                  requestId: b6effae6-35b8-493d-91aa-7d3b1b7c7dc7
+                  contactIds:
+                    - 37b4c536-eaec-11ef-ad4b-a75f8e9e1484
+              unifiedCreditsExample:
+                summary: Unified Credits plan with selective reveal
+                value:
+                  requestId: b6effae6-35b8-493d-91aa-7d3b1b7c7dc7
+                  contactIds:
+                    - ddfb6966-741f-4fca-a62b-e553d4ac12f8
+                  revealEmails: false
+                  revealPhones: true
+      responses:
+        '200':
+          description: Enriched contact data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactEnrichResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /prospecting/company/search:
+    post:
+      tags:
+        - Company Search & Enrich
+      summary: Search Companies
+      description: >
+        Search for companies using various filters. This is step 2 of the
+        prospecting process.
+
+         *Endpoint*: **(POST)  https://api.lusha.com/prospecting/company/search**
+      operationId: searchProspectingCompanies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanySearchRequest'
+      responses:
+        '200':
+          description: Search results with company IDs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanySearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /prospecting/company/enrich:
+    post:
+      tags:
+        - Company Search & Enrich
+      summary: Enrich Companies
+      description: >
+        Enrich companies from search results. This is step 3 of the prospecting
+        process.
+
+         *Endpoint*: **(POST)  https://api.lusha.com/prospecting/company/enrich**
+      operationId: enrichProspectingCompanies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyEnrichRequest'
+      responses:
+        '200':
+          description: Enriched company data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyEnrichResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/signals/filters/{objectType}:
+    get:
+      tags:
+        - Signal Filters
+      summary: Get Signal Options
+      description: >
+        Retrieve available signal options for a specific entity type (contact or
+        company).
+
+        This endpoint returns the list of signal types you can filter by when
+        enriching contacts or companies.
+
+
+
+
+        **Endpoints:**
+
+          * **Contacts:** `GET /api/signals/filters/contact`
+          * **Companies:** `GET /api/signals/filters/company`
+
+          ---
+
+        ### Available Signal Types
+
+
+        #### For contacts:
+
+        * **`allSignals`** - Retrieve all available signal types
+
+        * **`promotion`** - Track when a contact receives a promotion  
+
+        * **`companyChange`** - Monitor when a contact moves to a new company
+
+        #### For companies:
+
+        * **`allSignals`** - Retrieve all available signal types
+
+        * **`headcountGrowth`** - Monitor changes in company size
+
+        * **`newJobsOpen`** - Track newly posted job openings
+
+        * **`newsEvent`** - Company-related events and news
+
+          <br />
+
+
+          ##### News Event Categories          
+
+            The `newsEvent` signal type returns categorized company news:
+            | Category | Event Types |
+            |----------|------------|
+            | **Business Milestones** | `product launch`, `partnership`, `product development`, `product integration`, `signs new client`, `new client of` |
+            | **Corporate Expansion** | `acquires`, `acquired`, `facilities expansion`, `new location`, `new offices` |
+            | **Financial Growth** | `funding`, `invests into assets`, `invests into`, `ipo`, `receives investment` |
+            | **People & Leadership** | `executive appointment`, `executive departure`, `executive promotion`, `headcount increase` |
+            | **Recognition** | `event attendance`, `recognition`, `award` |
+            | **Risk** | `vulnerability issue`, `office closure`, `sells assets`, `sues`, `sued` |
+      operationId: getSignalOptions
+      parameters:
+        - name: objectType
+          in: path
+          required: true
+          description: The type of object to get signal options for
+          schema:
+            type: string
+            enum:
+              - contact
+              - company
+          example: contact
+      responses:
+        '200':
+          description: List of available signal types for the specified object type
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  signals:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - promotion
+                      - companyChange
+                  objectType:
+                    type: string
+                    example: contact
+              examples:
+                contactSignals:
+                  summary: Contact signal options
+                  value:
+                    signals:
+                      - promotion
+                      - companyChange
+                    objectType: contact
+                companySignals:
+                  summary: Company signal options
+                  value:
+                    signals:
+                      - headcountGrowth
+                      - newJobsOpen
+                    objectType: company
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Signals API not supported on your plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/signals/contacts:
+    post:
+      tags:
+        - Signals
+      summary: Get Contact Signals by IDs
+      description: >
+        Retrieve signals data for a list of contact IDs.
+
+        This endpoint allows you to get recent activities and signals for up to
+        100 contacts per request.
+
+
+        *Endpoint*: **(POST) https://api.lusha.com/api/signals/contacts**
+
+
+        **Default Behavior:**
+
+        - Returns signals from the last 6 months by default
+
+        - Use `startDate` to customize the timeframe
+
+        - Each signal type requested counts towards credit usage
+      operationId: getContactSignalsById
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactSignalsByIdRequest'
+            examples:
+              basicExample:
+                summary: Basic request
+                value:
+                  contactIds:
+                    - 115889
+                  signals:
+                    - promotion
+                    - companyChange
+                  startDate: '2025-01-01'
+              allSignals:
+                summary: Request all signal types
+                value:
+                  contactIds:
+                    - 115889
+                  signals:
+                    - allSignals
+      responses:
+        '200':
+          description: Contact signals retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactSignalsByIdResponse'
+              example:
+                contacts:
+                  '115889':
+                    personId: '115889'
+                    companyChange:
+                      - personId: '115889'
+                        currentCompanyId: 8217
+                        currentCompanyName: Callaway Golf
+                        currentDepartments: R&D
+                        currentSeniorityLabel: c-suite
+                        currentTitle: Senior Manager, IT Solutions
+                        signalDate: '2025-05-01'
+                        previousCompanyName: Previous Corp
+                        previousDomain: nextgen.com
+                        currentDomain: vendavo.com
+                    promotion:
+                      - personId: '115889'
+                        currentCompanyId: 8217
+                        currentCompanyName: Callaway Golf
+                        currentDepartments: R&D
+                        currentSeniorityLabel: c-suite
+                        currentTitle: Senior Manager, IT Solutions
+                        signalDate: '2025-05-01'
+                        previousCompanyName: Previous Corp
+                        previousDomain: nextgen.com
+                        currentDomain: vendavo.com
+                endDate: '2025-07-31'
+                startDate: '2025-01-01'
+                creditCharged: 2
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /api/signals/contacts/search:
+    post:
+      tags:
+        - Signals
+      summary: Search Contact Signals
+      description: >
+        Search for contact signals using identifiers like LinkedIn URL, email,
+        or name + company.
+
+        This endpoint combines search and signal enrichment in a single request.
+
+
+        *Endpoint*: **(POST) https://api.lusha.com/api/signals/contacts/search**
+
+
+        **Search Requirements:**
+
+        Each contact can be identified by:
+
+        - Contact ID
+
+        - LinkedIn URL
+
+        - Email address
+
+        - Full name + Company (name or domain)
+
+
+        **Default Behavior:**
+
+        - Returns signals from the last 6 months by default
+
+        - Contacts are matched based on provided identifiers
+
+        - Returns both contact data and associated signals
+      operationId: searchContactSignals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactSignalsSearchRequest'
+            examples:
+              searchByLinkedIn:
+                summary: Search by LinkedIn URL (id required)
+                value:
+                  contacts:
+                    - id: '123321'
+                      social_link: https://www.linkedin.com/in/ron-nabet
+                  signals:
+                    - promotion
+                    - companyChange
+                  startDate: '2025-01-01'
+              searchByEmail:
+                summary: Search by email (id required)
+                value:
+                  contacts:
+                    - id: '456654'
+                      email: dustin@lusha.com
+                  signals:
+                    - allSignals
+              searchByNameAndCompany:
+                summary: Search by name and company (id required)
+                value:
+                  contacts:
+                    - id: '987789'
+                      full_name: Ron Nabet
+                      companies:
+                        - name: Lusha
+                      domain: lusha.com
+                      is_current: true
+                  signals:
+                    - promotion
+      responses:
+        '200':
+          description: Contact signals search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactSignalsSearchResponse'
+              examples:
+                success:
+                  summary: Contact signals found via search
+                  value:
+                    contacts:
+                      '123321':
+                        personId: '115889'
+                        companyChange:
+                          - personId: '115889'
+                            currentCompanyId: 8217
+                            currentCompanyName: Callaway Golf
+                            currentDepartments: R&D
+                            currentSeniorityLabel: c-suite
+                            currentTitle: Senior Manager, IT Solutions
+                            signalDate: '2025-05-01'
+                            previousCompanyName: Previous Corp
+                            previousDomain: nextgen.com
+                            currentDomain: vendavo.com
+                        promotion:
+                          - personId: '115889'
+                            currentCompanyId: 8217
+                            currentCompanyName: Callaway Golf
+                            currentDepartments: R&D
+                            currentSeniorityLabel: c-suite
+                            currentTitle: Senior Manager, IT Solutions
+                            signalDate: '2025-05-01'
+                            previousCompanyName: Previous Corp
+                            previousDomain: nextgen.com
+                            currentDomain: vendavo.com
+                    endDate: '2025-07-31'
+                    startDate: '2025-01-01'
+                    creditCharged: 2
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /api/signals/companies:
+    post:
+      tags:
+        - Signals
+      summary: Get Company Signals by IDs
+      description: >
+        Retrieve signals data for a list of company IDs.
+
+        This endpoint allows you to get recent activities and signals for up to
+        100 companies per request.
+
+
+        *Endpoint*: **(POST) https://api.lusha.com/api/signals/companies**
+
+
+        **Default Behavior:**
+
+        - Returns signals from the last 6 months by default
+
+        - Use `startDate` to customize the timeframe
+      operationId: getCompanySignalsById
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanySignalsByIdRequest'
+            examples:
+              basicExample:
+                summary: Basic request
+                value:
+                  companyIds:
+                    - 3416
+                  signals:
+                    - headcountGrowth
+                    - newJobsOpen
+                    - newsEvent
+                  startDate: '2025-01-01'
+              allSignals:
+                summary: Request all signals
+                value:
+                  companyIds:
+                    - 3416
+                    - 3417
+                  signals:
+                    - allSignals
+      responses:
+        '200':
+          description: Company signals retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanySignalsByIdResponse'
+              examples:
+                success:
+                  summary: Company signals found
+                  value:
+                    companies:
+                      '3416':
+                        companyId: '3416'
+                        newJobsOpen:
+                          - companyId: '3416'
+                            signalType: new_jobs_count
+                            score: high
+                            signalDate: '2025-06-15'
+                            historicalAvg: 15.5
+                            newValue: 25
+                            oldValue: 10
+                        headcountGrowth:
+                          - companyId: '3416'
+                            signalType: new_jobs_count
+                            score: high
+                            signalDate: '2025-06-15'
+                            historicalAvg: 15.5
+                            newValue: 25
+                            oldValue: 10
+                    endDate: '2025-07-31'
+                    startDate: '2025-01-01'
+                    creditCharged: 3
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /api/signals/companies/search:
+    post:
+      tags:
+        - Signals
+      summary: Search Company Signals
+      description: >
+        Search for company signals using identifiers like domain, company name,
+        or ID.
+
+        This endpoint combines search and signal enrichment in a single request.
+
+
+        *Endpoint*: **(POST)
+        https://api.lusha.com/api/signals/companies/search**
+
+
+        **Search Requirements:**
+
+        Each company must have at least one identifier:
+
+        - Company ID (as string)
+
+        - Company name
+
+        - Company domain
+
+
+        **Default Behavior:**
+
+        - Returns signals from the last 6 months by default
+
+        - Companies are matched based on provided identifiers
+      operationId: searchCompanySignals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanySignalsSearchRequest'
+            examples:
+              searchByDomain:
+                summary: Search by domain (id required)
+                value:
+                  companies:
+                    - id: '12344321'
+                      domain: lusha.com
+                  signals:
+                    - headcountGrowth
+                    - newJobsOpen
+                    - newsEvent
+                  startDate: '2025-01-01'
+              searchByName:
+                summary: Search by company name (id required)
+                value:
+                  companies:
+                    - id: '123123'
+                      name: Lusha
+                  signals:
+                    - allSignals
+                  startDate: '2025-01-01'
+              multipleCompanies:
+                summary: >-
+                  Search multiple companies with different identifiers (id
+                  required for each)
+                value:
+                  companies:
+                    - id: '123123'
+                      name: Arcmedix
+                    - id: '12344321'
+                      domain: lusha.com
+                    - id: '1234434421'
+                      domain: example.com
+                  signals:
+                    - headcountGrowth
+                    - newJobsOpen
+                  startDate: '2025-01-01'
+      responses:
+        '200':
+          description: Company signals search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanySignalsByIdResponse'
+              examples:
+                success:
+                  summary: Company signals found via search
+                  value:
+                    companies:
+                      '12344321':
+                        companyId: '3416'
+                        newJobsOpen:
+                          - companyId: '3416'
+                            signalType: new_jobs_count
+                            score: high
+                            signalDate: '2025-06-15'
+                            historicalAvg: 15.5
+                            newValue: 25
+                            oldValue: 10
+                        headcountGrowth:
+                          - companyId: '3416'
+                            signalType: new_jobs_count
+                            score: high
+                            signalDate: '2025-06-15'
+                            historicalAvg: 15.5
+                            newValue: 25
+                            oldValue: 10
+                    endDate: '2025-07-31'
+                    startDate: '2025-01-01'
+                    creditCharged: 3
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /account/usage:
+    get:
+      tags:
+        - Account Management
+      summary: Get Account Usage Statistics
+      description: >
+        Retrieve your current API credit usage statistics including used,
+        remaining, and total credits.
+
+
+        *Endpoint*: **(GET) https://api.lusha.com/account/usage**
+
+
+        **Rate Limits**: This endpoint has a specific rate limit of 5 requests
+        per minute.
+      operationId: getAccountUsageStats
+      responses:
+        '200':
+          description: Account usage statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountUsageStatsResponse'
+              example:
+                usage:
+                  bulkCredits:
+                    used: 150
+                    total: 1000
+                    remaining: 850
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/recommendations/contacts:
+    post:
+      tags:
+        - Contact Recommendations
+      summary: Get Contact Recommendations
+      description: >
+        Fetch recommended contacts by supplying the contact’s IDs, enabling
+        Lusha to return similar profiles aligned by job title, seniority, and
+        company context Use requestId to get more results from a previous
+        search.
+
+        *Endpoint*: **(POST)
+        https://api.lusha.com/api/recommendations/contacts**
+      operationId: getContactRecommendations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactRecommendationsRequest'
+      responses:
+        '200':
+          description: Successfully retrieved contact recommendations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactRecommendationsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '402':
+          description: Insufficient credits
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/recommendations/companies:
+    post:
+      tags:
+        - Company Recommendations
+      summary: Get Company Recommendations
+      description: >
+        Get company recommendations based on other companies.  Use requestId to
+        get more results from a previous search.
+
+        *Endpoint*: **(POST)
+        https://api.lusha.com/api/recommendations/companies**
+      operationId: getCompanyRecommendations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyRecommendationsRequest'
+      responses:
+        '200':
+          description: Successfully retrieved company recommendations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyRecommendationsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '402':
+          description: Insufficient credits
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: api_key
+      description: >
+        Your Lusha API key. You can find this in your Lusha dashboard under API
+        settings.
+
+
+        Include this key in the `api_key` header for all requests.
+  parameters:
+    firstName:
+      name: firstName
+      in: query
+      description: The first name of the person
+      schema:
+        type: string
+      example: Dustin
+    lastName:
+      name: lastName
+      in: query
+      description: The last name of the person
+      schema:
+        type: string
+      example: Moskovitz
+    companyName:
+      name: companyName
+      in: query
+      description: The name of the company the person works at
+      schema:
+        type: string
+      example: Lusha
+    companyDomain:
+      name: companyDomain
+      in: query
+      description: The domain name of the company
+      schema:
+        type: string
+      example: lusha.com
+    email:
+      name: email
+      in: query
+      description: The email address of the person
+      schema:
+        type: string
+        format: email
+      example: dustin@lusha.com
+    linkedinUrl:
+      name: linkedinUrl
+      in: query
+      description: The LinkedIn URL of the person
+      schema:
+        type: string
+        format: url
+      example: https://www.linkedin.com/in/dustin/
+    refreshJobInfo:
+      name: refreshJobInfo
+      in: query
+      description: >
+        Set to true to refresh and update the job details for the person. 
+
+        This ensures that outdated job information is replaced with the most
+        recent data.
+      schema:
+        type: boolean
+        default: false
+      example: true
+    filterBy:
+      name: filterBy
+      in: query
+      description: >
+        Filters results based on specific contact details. Available options:
+
+        - `phoneNumbers`: Only return contacts with phone numbers
+
+        - `emailAddresses`: Only return contacts with email addresses
+
+
+        By default, results will include contacts with at least one contact
+        detail.
+      schema:
+        type: string
+        enum:
+          - phoneNumbers
+          - emailAddresses
+    revealEmails:
+      name: revealEmails
+      in: query
+      description: >
+        Set `revealEmails=true` to retrieve only the email address of the
+        contact.
+      schema:
+        type: boolean
+        default: true
+      example: true
+    revealPhones:
+      name: revealPhones
+      in: query
+      description: >
+        Set `revealPhones=true` to retrieve only the phone number of the
+        contact.
+      schema:
+        type: boolean
+        default: true
+      example: true
+    signals:
+      name: signals
+      in: query
+      description: |
+        Array of signal types to retrieve for the contact.
+        - `allSignals`: All available signal types
+        - `promotion`: Promotion signals
+        - `companyChange`: Company change signals
+      schema:
+        type: array
+        items:
+          type: string
+          enum:
+            - allSignals
+            - promotion
+            - companyChange
+      example:
+        - promotion
+    signalsStartDate:
+      name: signalsStartDate
+      in: query
+      description: >
+        Start date for signal retrieval in YYYY-MM-DD format. Defaults to 6
+        months ago if not specified.
+      schema:
+        type: string
+        format: date
+      example: '2025-03-01'
+    partialProfile:
+      name: partialProfile
+      in: query
+      description: >
+        Search for a single contact with the option to receive a partial
+        profile.
+      required: false
+      schema:
+        type: boolean
+        default: false
+      example: true
+  responses:
+    BadRequest:
+      description: Bad request - invalid input data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: 400
+              message: Invalid request parameters
+    Unauthorized:
+      description: Unauthorized - invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: 401
+              message: Invalid API key
+    Forbidden:
+      description: Forbidden - account inactive or feature not available
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            accountInactive:
+              summary: Account inactive
+              value:
+                error:
+                  code: 403
+                  message: >-
+                    Your account is not active. Please reach out to support at
+                    support@lusha.com
+            featureNotAvailable:
+              summary: Feature not available for pricing plan
+              value:
+                error:
+                  code: 403
+                  message: >-
+                    Your pricing version does not support requesting individual
+                    datapoints [revealEmails, revealPhones]
+    NotFound:
+      description: Not found - resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: 404
+              message: Contact not found
+    TooManyRequests:
+      description: Too many requests - rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: 429
+              message: Too many requests. Please wait before making another request.
+          headers:
+            RateLimit-Limit:
+              description: The total number of allowed requests per second
+              schema:
+                type: integer
+            RateLimit-Remaining:
+              description: The number of remaining requests in the current window
+              schema:
+                type: integer
+            RateLimit-Reset:
+              description: The time (in seconds) until the rate limit quota is reset
+              schema:
+                type: integer
+            X-RateLimit-Remaining-Daily:
+              description: The number of remaining requests for your daily quota
+              schema:
+                type: integer
+            X-RateLimit-Reset-Daily:
+              description: The time when your daily quota will reset
+              schema:
+                type: integer
+    GDPRRestricted:
+      description: GDPR restricted - unable to process due to GDPR regulations
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: 451
+              message: >-
+                We are unable to process this contact request due to our GDPR
+                regulations
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: 500
+              message: Internal server error. Please try again later.
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: integer
+              description: HTTP status code
+            message:
+              type: string
+              description: Error message
+          required:
+            - code
+            - message
+      required:
+        - error
+    Company:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the company, Required if no domain.
+          example: Lusha
+        domain:
+          type: string
+          description: The domain of the company, Required if no name.
+          example: lusha.com
+        isCurrent:
+          type: boolean
+          description: Indicates whether this is the person's current company
+          example: true
+        jobTitle:
+          type: string
+          description: The job title of the person at the company
+          example: Software Engineer
+        fqdn:
+          type: string
+          description: The fully qualified domain name of the company
+          example: https://lusha.com
+        companySocialId:
+          type: string
+          description: The social ID associated with the company (if available)
+          example: '1234567890'
+      required:
+        - isCurrent
+    ContactSearchBulk:
+      type: object
+      properties:
+        contactId:
+          type: string
+          description: >-
+            A unique sequential ID to associate with the contact object in the
+            API response
+          example: '1234'
+        fullName:
+          type: string
+          description: The full name of the person
+          example: Dustin Moskovitz
+        location:
+          type: string
+          description: The raw location of the person
+          example: Singapore,Chicago
+        linkedinUrl:
+          type: string
+          description: The LinkedIn URL of the person
+          example: https://www.linkedin.com/in/dustin/
+        email:
+          type: string
+          description: The email address of the person
+          example: dustin@lusha.com
+        companies:
+          description: >-
+            Details of the company where the contact is currently employed (or
+            previously employed if applicable)
+          type: array
+          items:
+            $ref: '#/components/schemas/Company'
+      required:
+        - contactId
+    Metadata:
+      type: object
+      properties:
+        refreshJobInfo:
+          type: boolean
+          description: >-
+            Set this to true to refresh job information for the contact. This
+            replaces any outdated job details with the most current information.
+            By default, Lusha returns results for records that have at least one
+            of the specified contact details (e.g., phone number or email
+            address).
+          example: true
+        filterBy:
+          type: string
+          description: >-
+            Filters the results based on specific contact details. Use the
+            following options: emailAddresses, phoneNumbers
+          example: emailAddresses
+        revealEmails:
+          type: boolean
+          description: >
+            Set `revealEmails=true` to retrieve only the email address of the
+            contact.
+          example: true
+        revealPhones:
+          type: boolean
+          description: >
+            Set `revealPhones=true` to retrieve only the phone number of the
+            contact.
+          example: true
+        signals:
+          type: array
+          description: |
+            Array of signal types to retrieve for the contact.
+            - `allSignals`: All available signal types
+            - `promotion`: Promotion signals
+            - `companyChange`: Company change signals
+          items:
+            type: string
+            enum:
+              - allSignals
+              - promotion
+              - companyChange
+          example:
+            - promotion
+            - companyChange
+        signalsStartDate:
+          type: string
+          format: date
+          description: >
+            Start date for signal retrieval in YYYY-MM-DD format. Defaults to 6
+            months ago if not specified.
+          example: '2025-03-01'
+        partialProfile:
+          type: boolean
+          description: >
+            When set to true, returns a simplified contact profile with basic
+            information only.
+          default: false
+          example: true
+    SearchBulkContactsRequest:
+      type: object
+      properties:
+        contacts:
+          description: >-
+            This is a required parameter that should contain a list of contact
+            objects. Each contact will be processed based on the provided
+            contact details.
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactSearchBulk'
+        metadata:
+          description: Metadata for the search to filter the results
+          $ref: '#/components/schemas/Metadata'
+      required:
+        - contacts
+    ContactError:
+      type: object
+      nullable: true
+      properties:
+        code:
+          type: number
+          description: The code of the contact error
+          example: 3
+        name:
+          type: string
+          description: The name of the contact error
+          example: EMPTY_DATA
+        message:
+          type: string
+          description: The message of the contact error
+          example: Could not find requested data
+      required:
+        - code
+        - name
+        - message
+    EmailAddress:
+      type: object
+      properties:
+        email:
+          type: string
+          description: The email address (alternative to 'address')
+          example: dustin@lusha.com
+        address:
+          type: string
+          description: The email address (alternative to 'email')
+          example: dustin@lusha.com
+        emailType:
+          type: string
+          description: The type of email address (alternative to 'type')
+          example: work
+          enum:
+            - work
+            - private
+        emailConfidence:
+          type: string
+          description: The confidence level of the email address
+          example: A+
+        updateDate:
+          type: string
+          description: The update date of the email address
+          example: '2020-01-01'
+    PhoneNumbers:
+      type: object
+      properties:
+        number:
+          type: string
+          description: The phone number
+          example: '+1234567890'
+        phoneType:
+          type: string
+          description: The type of phone number
+          example: Mobile
+          enum:
+            - Mobile
+            - Direct
+            - Phone
+        doNotCall:
+          type: boolean
+          description: Indicates whether the phone number is listed as "Do Not Call" (DNC).
+          example: false
+        updateDate:
+          type: string
+          description: The update date of the phone number
+          example: '2020-01-01'
+      required:
+        - phoneType
+        - doNotCall
+        - updateDate
+    LocationResponse:
+      type: object
+      properties:
+        country:
+          type: string
+          description: The country where the person is located.
+          example: Israel
+        countryIso2:
+          type: string
+          description: The ISO 3166-1 alpha-2 country code of the person.
+          example: IL
+        country_iso2:
+          type: string
+          description: The ISO 3166-1 alpha-2 country code of the person.
+          example: IL
+        continent:
+          type: string
+          description: The continent where the person is located.
+          example: Asia
+        rawLocation:
+          type: string
+          example: 800 Boylston St, Suite 1410, Boston, MA 02199, US
+          description: The detailed address.
+        region:
+          type: string
+          description: The region where the person is located.
+          example: Tel Aviv
+        city:
+          type: string
+          description: The city where the person is located.
+          example: Tel Aviv
+        cityId:
+          type: number
+          description: The ID of the city where the person is located.
+          example: 123
+        state:
+          type: string
+          description: The state where the person is located.
+          example: Tel Aviv
+        stateCode:
+          type: string
+          description: The state code of the person.
+          example: IL
+        state_code:
+          type: string
+          description: The state code of the person.
+          example: IL
+        street:
+          type: string
+          description: The street where the person is located.
+          example: 123 Main St
+        locationCoordinates:
+          description: The coordinates of the person.
+          example:
+            - 32.0853
+            - 34.7818
+          type: array
+          items:
+            type: number
+        isEuContact:
+          type: boolean
+          description: Indicates whether the person is in the EU.
+          example: true
+      required:
+        - country
+        - countryIso2
+        - continent
+        - rawLocation
+    CompaniesBulkResponse:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/CompanyBulkResponse'
+    CompanyCrunchbaseResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          example: https://crunchbase.com/company/lusha
+      required:
+        - url
+    CompanyLinkedinResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          example: https://linkedin.com/company/lusha
+      required:
+        - url
+    CompanySocialResponse:
+      type: object
+      properties:
+        crunchbase:
+          $ref: '#/components/schemas/CompanyCrunchbaseResponse'
+        linkedin:
+          $ref: '#/components/schemas/CompanyLinkedinResponse'
+    CompanyLocationResponse:
+      type: object
+      properties:
+        city:
+          type: string
+          example: Anytown
+        country:
+          type: string
+          example: USA
+        fullLocation:
+          type: string
+          example: 123 Main St, Anytown, USA
+        state:
+          type: string
+          example: CA
+        stateCode:
+          type: string
+          example: CA
+        countryIso2:
+          type: string
+          example: US
+        rawLocation:
+          type: string
+          example: 123 Main St, Anytown, USA
+    CompanySingleResponseData:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 123
+          description: A unique identifier for the Lusha company.
+        description:
+          type: string
+          example: >-
+            Lusha is the sales intelligence platform designed to help businesses
+            get their next customers.
+          description: A brief description of the company.
+        domain:
+          type: string
+          example: lusha.com
+          description: The domain name associated with the company's email addresses.
+        employees:
+          type: string
+          example: 201 - 500
+          description: The company's employee size range.
+        founded:
+          type: string
+          example: August 1, 2011
+          description: The year the company was founded.
+        fqdn:
+          type: string
+          example: www.lusha.com
+          description: The fully qualified domain name of the company.
+        logoUrl:
+          type: string
+          example: https://logo.lusha.co/logo.jpg
+          description: The URL of the company's logo.
+        name:
+          type: string
+          example: Lusha
+          description: The name of the company.
+        revenueRange:
+          example:
+            - 1000000
+            - 10000000
+          description: The company's revenue range.
+          type: array
+          items:
+            type: number
+        mainIndustry:
+          type: string
+          example: Technology
+          description: The main industry of the company.
+        subIndustry:
+          type: string
+          example: Software
+          description: The specific sub-sector within the primary industry.
+        social:
+          description: Social media links associated with the company.
+          $ref: '#/components/schemas/CompanySocialResponse'
+        address:
+          type: string
+          example: >-
+            North America United States Boston  800 Boylston St , Suite 1410 ,
+            Boston, Massachusetts 02199, US  Massachusetts US MA
+            -71.05976867675781,42.358428955078125 
+          description: The full address of the company's location.
+        location:
+          description: An object containing the company's location details.
+          $ref: '#/components/schemas/CompanyLocationResponse'
+        categories:
+          description: LinkedIn industry tags for the company.
+          example:
+            - Technology
+            - Software
+          type: array
+          items:
+            type: string
+        industryPrimaryGroupDetails:
+          $ref: '#/components/schemas/CompanyIndustryPrimaryGroupDetails'
+        website:
+          type: string
+          description: The company's website URL.
+          example: https://lusha.com
+        specialities:
+          description: LinkedIn specialties tags associated with the company.
+          example:
+            - Sales
+            - Marketing
+          type: array
+          items:
+            type: string
+        funding:
+          description: Details regarding the company's funding activities.
+          $ref: '#/components/schemas/CompanyFunding'
+        intent:
+          description: >-
+            A list of detected intent topics related to the company based on
+            your account's mapped topics.
+          $ref: '#/components/schemas/CompanyIntent'
+        technologies:
+          description: A list of technologies associated with the company.
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyTechnology'
+      required:
+        - id
+        - name
+    CompanyErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Something went wrong
+      required:
+        - message
+    CompanySingleResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/CompanySingleResponseData'
+        errors:
+          $ref: '#/components/schemas/CompanyErrorResponse'
+        meta:
+          type: object
+          description: >-
+            Currently returns an empty value; this field should be deprecated in
+            future releases.
+          example: {}
+    CountryFilter:
+      type: object
+      properties:
+        name:
+          type: string
+          example: United States
+        code:
+          type: string
+          example: US
+      required:
+        - name
+        - code
+    LocationSearchRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          description: Search text for location
+          example: un
+      required:
+        - text
+    LocationFilter:
+      type: object
+      properties:
+        continent:
+          type: string
+          example: North America
+        country:
+          type: string
+          example: United States
+        city:
+          type: string
+          example: New York
+        state:
+          type: string
+          example: New York
+        country_grouping:
+          type: string
+          example: na
+    CompanyNameSearchRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          description: Search text for company name
+          example: lusha
+      required:
+        - text
+    CompanyNameResult:
+      type: object
+      properties:
+        companyId:
+          type: number
+          example: 33222678
+        name:
+          type: string
+          example: Lusha
+        logoUrl:
+          type: string
+          example: https://logo.lusha.co/d/company_33222678_logo.jpg
+        fqdn:
+          type: string
+          example: www.lusha.com
+    IndustryLabel:
+      type: object
+      properties:
+        main_industry:
+          type: string
+          example: Hospitality
+        main_industry_id:
+          type: number
+          example: 1
+        sub_industries:
+          type: array
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+                example: Other
+              id:
+                type: number
+                example: 778
+    CompanySizeRange:
+      type: object
+      properties:
+        min:
+          type: number
+          example: 1
+        max:
+          type: number
+          example: 10
+    RevenueRange:
+      type: object
+      properties:
+        min:
+          type: number
+          example: 1
+        max:
+          type: number
+          example: 1000000
+    CompanyLocationFilter:
+      type: object
+      properties:
+        country:
+          type: string
+          example: United States
+        continent:
+          type: string
+          example: North America
+        country_grouping:
+          type: string
+          example: na
+    SicCode:
+      type: object
+      properties:
+        code:
+          type: string
+          example: '1011'
+        label:
+          type: string
+          example: Iron ores
+    NaicsCode:
+      type: object
+      properties:
+        code:
+          type: string
+          example: '11'
+        label:
+          type: string
+          example: Agriculture, Forestry, Fishing and Hunting
+    TechnologySearchRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          description: Search text for technology
+          example: rss
+      required:
+        - text
+    Technology:
+      type: object
+      properties:
+        name:
+          type: string
+          example: rss
+    PaginationParams:
+      type: object
+      properties:
+        page:
+          type: number
+          description: Page number (0-1000)
+          minimum: 0
+          maximum: 1000
+          default: 0
+        size:
+          type: number
+          description: Page size (10-50)
+          minimum: 10
+          maximum: 50
+          default: 20
+    ContactFilters:
+      type: object
+      properties:
+        include:
+          type: object
+          properties:
+            departments:
+              type: array
+              items:
+                type: string
+              example:
+                - Engineering & Technical
+            seniority:
+              type: array
+              items:
+                type: string
+              example:
+                - '4'
+                - '5'
+            existing_data_points:
+              type: array
+              items:
+                type: string
+              example:
+                - phone
+                - work_email
+            locations:
+              type: array
+              items:
+                $ref: '#/components/schemas/LocationFilter'
+            jobTitles:
+              type: array
+              items:
+                type: string
+              example:
+                - CTO
+                - Chief Technology Officer
+                - VP Engineering
+                - Senior Developer
+            searchText:
+              type: string
+              description: Free-text search across contact fields
+              example: Amit
+          exclude:
+            type: object
+            description: Same structure as include, for exclusion filters
+    CompanyFilters:
+      type: object
+      properties:
+        include:
+          type: object
+          properties:
+            names:
+              type: array
+              items:
+                type: string
+              example:
+                - Apple
+            domains:
+              type: array
+              items:
+                type: string
+                example: lusha.com
+            locations:
+              type: array
+              items:
+                type: object
+                properties:
+                  country:
+                    type: string
+                    example: United States
+            technologies:
+              type: array
+              items:
+                type: string
+              example:
+                - Amazon
+            intentTopics:
+              type: array
+              items:
+                type: string
+              example:
+                - Digital Sales
+            sizes:
+              type: array
+              items:
+                $ref: '#/components/schemas/CompanySizeRange'
+            revenues:
+              type: array
+              items:
+                $ref: '#/components/schemas/RevenueRange'
+            sicCodes:
+              type: array
+              items:
+                type: string
+              example:
+                - '1011'
+                - '1021'
+            naicsCodes:
+              type: array
+              items:
+                type: string
+              example:
+                - '11'
+                - '21'
+            mainIndustriesIds:
+              type: array
+              items:
+                type: number
+              example:
+                - 4
+                - 5
+            subIndustriesIds:
+              type: array
+              items:
+                type: number
+              example:
+                - 101
+            searchText:
+              type: string
+              description: Free-text search across company fields
+              example: Finance Marketing in Germany DE
+        exclude:
+          type: object
+          description: Same structure as include, for exclusion filters
+    ContactSearchRequest:
+      type: object
+      properties:
+        includePartialContact:
+          type: boolean
+          description: >
+            When set to true, includes contacts with partial information in the
+            search results.
+
+            Partial contacts may have incomplete data but can still be valuable
+            prospects.
+          default: true
+          example: false
+        pages:
+          $ref: '#/components/schemas/PaginationParams'
+        filters:
+          type: object
+          properties:
+            contacts:
+              $ref: '#/components/schemas/ContactFilters'
+            companies:
+              $ref: '#/components/schemas/CompanyFilters'
+      required:
+        - filters
+    ContactSearchData:
+      type: object
+      properties:
+        contactId:
+          type: string
+          description: A unique serial contact ID generated for each search response
+          example: 06de9b18-516d-5512-5cb5-6ec5pb215776
+        isShown:
+          type: boolean
+          description: >-
+            Indicates whether the contact was already revealed by any of the
+            account users
+          example: false
+        name:
+          type: string
+          description: The full name of the contact
+          example: Chris Karageorge
+        jobTitle:
+          type: string
+          description: The job title held by the person at their current company
+          example: Senior Director of Technical Operations
+        companyId:
+          type: number
+          description: A unique identifier for a Lusha company
+          example: 28054532
+        companyName:
+          type: string
+          description: The name of the company where the person currently works
+          example: Lusha
+        fqdn:
+          type: string
+          description: The fqdn of the company
+          example: lusha.com
+        companyDescription:
+          type: string
+          description: A description of the company
+          example: >-
+            Lusha is the leader in Sales Streaming – a new sales paradigm that
+            streams top leads straight to salespeople and handles all the
+            outreach, so they can escape the lead grind and just
+            sell.\n\nLusha’s Sales Streaming Platform is built around Sales
+            Playlists that continuously fill up with their ideal prospects –
+            think “Spotify for sales.” With AI doing the heavy lifting, Lusha
+            uncovers great-fit leads salespeople never knew existed and executes
+            tailored, perfectly timed cadences that get meetings booked. And the
+            more you use Lusha, the smarter it gets.\n\nWith Sales Streaming,
+            salespeople spend most of their time face-to-face with relevant
+            prospects, driving 4-6X more business.
+        logoUrl:
+          type: string
+          description: The URL of the company's logo
+          example: >-
+            https://logo.lusha.co/brightdata/year=2024/month=04/day=30/j_lvlvj2vh1yv1ee0hye.b098e8301e8d32c12d1c8949a0624ba44761f995.file_lvlwjpb62juzpfz0l2.logo_cached.jpg
+        hasCompanyEmployeesCount:
+          type: boolean
+        hasCompanyRevenue:
+          type: boolean
+        hasCompanyMainIndustry:
+          type: boolean
+        hasCompanySubIndustry:
+          type: boolean
+        hasCompanyFunding:
+          type: boolean
+        hasCompanyIntent:
+          type: boolean
+        hasCompanyTechnologies:
+          type: boolean
+        hasDepartment:
+          type: boolean
+        hasSeniority:
+          type: boolean
+        hasContactLocation:
+          type: boolean
+        hasSocialLink:
+          type: boolean
+        hasEmails:
+          type: boolean
+        hasWorkEmail:
+          type: boolean
+        hasPrivateEmail:
+          type: boolean
+        hasPhones:
+          type: boolean
+        hasMobilePhone:
+          type: boolean
+        hasDirectPhone:
+          type: boolean
+        hasCompanyCity:
+          type: boolean
+        hasCompanyCountry:
+          type: boolean
+    ContactSearchResponse:
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: The unique request ID used for subsequent enrichment requests
+        currentPage:
+          type: number
+          description: The current page of the search results
+        pageLength:
+          type: number
+          description: The number of results on the page
+        totalResults:
+          type: number
+          description: The total number of search results
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactSearchData'
+    ContactEnrichRequest:
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: The requestId generated in the Prospecting Search response (UUID)
+          example: b6effae6-35b8-493d-91aa-7d3b1b7c7dc7
+        contactIds:
+          type: array
+          description: An array containing the contact IDs for enrichment. Min 1, max 100.
+          items:
+            type: string
+          example:
+            - 37b4c536-eaec-11ef-ad4b-a75f8e9e1484
+        revealEmails:
+          type: boolean
+          description: >
+            Set `revealEmails=true` to retrieve only the email address of the
+            contact.
+
+            Only available to customers on the **Unified Credits** pricing plan.
+          example: false
+        revealPhones:
+          type: boolean
+          description: >
+            Set `revealPhones=true` to retrieve only the phone number of the
+            contact.
+
+            Only available to customers on the **Unified Credits** pricing plan.
+          example: true
+      required:
+        - requestId
+        - contactIds
+    ContactEnrichData:
+      type: object
+      properties:
+        firstName:
+          type: null
+          example: Carolina
+        lastName:
+          type: string
+          example: Portela
+        fullName:
+          type: string
+          example: Carolina Portela
+        isShown:
+          type: boolean
+          example: false
+        jobTitle:
+          type: string
+          example: Solutions Engineer
+        location:
+          type: object
+          properties:
+            city:
+              type: string
+              example: Boston
+            state:
+              type: string
+              example: Massachusetts
+            country:
+              type: string
+              example: United States
+            country_iso2:
+              type: string
+              example: US
+            continent:
+              type: string
+              example: North America
+        emailAddresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmailAddress'
+        phoneNumbers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhoneNumbers'
+        companyId:
+          type: number
+          example: 3553744
+        companyName:
+          type: string
+          example: Lusha
+        socialLinks:
+          type: object
+          properties:
+            linkedin:
+              type: string
+              example: https://www.linkedin.com/in/carolinaportela/
+        departments:
+          type: array
+          items:
+            type: string
+            example: Engineering & Technical
+        seniority:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: number
+                example: 4
+              value:
+                type: string
+                example: senior
+        company:
+          type: object
+          properties:
+            revenueRange:
+              type: array
+              items:
+                type: number
+            funding:
+              $ref: '#/components/schemas/CompanyFunding'
+            intent:
+              $ref: '#/components/schemas/CompanyIntent'
+            mainIndustry:
+              type: string
+            subIndustry:
+              type: string
+            technologies:
+              type: array
+              items:
+                $ref: '#/components/schemas/CompanyTechnology'
+    ContactEnrichResponse:
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: The requestId that was used in the request
+        contacts:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the contact from the enrichment request
+              isSuccess:
+                type: boolean
+                description: Indicates whether the enrichment process was successful
+              data:
+                $ref: '#/components/schemas/ContactEnrichData'
+    CompanySearchRequest:
+      type: object
+      properties:
+        pages:
+          $ref: '#/components/schemas/PaginationParams'
+        filters:
+          type: object
+          properties:
+            companies:
+              $ref: '#/components/schemas/CompanyFilters'
+      required:
+        - filters
+    CompanySearchData:
+      type: object
+      properties:
+        id:
+          type: string
+          description: A unique identifier for a Lusha company
+        name:
+          type: string
+          description: The name of the company
+        fqdn:
+          type: string
+          description: The fqdn of the company
+        description:
+          type: string
+          description: A description of the company
+        logoUrl:
+          type: string
+          description: The URL of the company's logo
+        hasCompanyEmployeesCount:
+          type: boolean
+        hasCompanyRevenue:
+          type: boolean
+        hasCompanyMainIndustry:
+          type: boolean
+        hasCompanySubIndustry:
+          type: boolean
+        hasCompanyFunding:
+          type: boolean
+        hasCompanyIntent:
+          type: boolean
+        hasCompanyTechnologies:
+          type: boolean
+        hasCompanyCity:
+          type: boolean
+        hasCompanyCountry:
+          type: boolean
+    CompanySearchResponse:
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: >-
+            The requestId that should be used in Prospecting Enrich request API
+            params
+        currentPage:
+          type: number
+          description: Current page of search results
+        pageLength:
+          type: number
+          description: Page length
+        totalResults:
+          type: number
+          description: Total search results
+        companies:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanySearchData'
+    CompanyEnrichRequest:
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: The requestId from the Prospecting Search response
+          example: 5ad275c8-7dd4-462a-bd45-6bc1970da64e
+        companiesIds:
+          type: array
+          description: An array of company IDs for enrichment. Min 1, max 100.
+          items:
+            type: string
+          example:
+            - '1586'
+      required:
+        - requestId
+        - companiesIds
+    CompanyEnrichData:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        companySize:
+          type: object
+          properties:
+            min:
+              type: number
+            max:
+              type: number
+            employees_in_linkedin:
+              type: number
+        employees:
+          type: string
+          example: 10001 - 100000
+        revenueRange:
+          type: array
+          items:
+            type: number
+        fqdn:
+          type: string
+        description:
+          type: string
+        domains:
+          type: object
+          properties:
+            email:
+              type: string
+            homepage:
+              type: string
+        logoUrl:
+          type: string
+        industryTags:
+          type: array
+          items:
+            type: string
+        stateCode:
+          type: string
+        social:
+          type: object
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+        countryIso2:
+          type: string
+        continent:
+          type: string
+        rawLocation:
+          type: string
+        coordinates:
+          type: array
+          items:
+            type: number
+        specialities:
+          type: array
+          items:
+            type: string
+        mainIndustry:
+          type: string
+        subIndustry:
+          type: string
+        funding:
+          $ref: '#/components/schemas/CompanyFunding'
+        intent:
+          $ref: '#/components/schemas/CompanyIntent'
+        technologies:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyTechnology'
+    CompanyEnrichResponse:
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: The requestId used in the request
+        companies:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyEnrichData'
+    JobTitle:
+      type: object
+      properties:
+        seniority:
+          type: string
+          description: The seniority of the person.
+          example: Director
+        title:
+          type: string
+          description: The title of the person.
+          example: Director of Platform
+        departments:
+          description: The departments of the person.
+          example:
+            - Engineering
+            - Operations
+          type: array
+          items:
+            type: string
+      required:
+        - seniority
+        - title
+        - departments
+    PreviousJobResponse:
+      type: object
+      properties:
+        jobTitle:
+          description: The job title of the person
+          $ref: '#/components/schemas/JobTitle'
+        company:
+          description: The company of the person
+          $ref: '#/components/schemas/Company'
+      required:
+        - jobTitle
+        - company
+    SocialLinks:
+      type: object
+      properties:
+        linkedin:
+          type: string
+          description: The LinkedIn URL of the person
+          example: https://www.linkedin.com/in/dustin/
+      required:
+        - linkedin
+    ContactTag:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the contact tag
+          example: '123'
+        name:
+          type: string
+          description: The name of the contact tag
+          example: Prospect
+        color:
+          type: string
+          description: The color of the contact tag
+          example: '#000000'
+      required:
+        - id
+        - name
+        - color
+    Contact:
+      type: object
+      properties:
+        companyId:
+          type: number
+          description: A unique identifier for the company on Lusha
+          example: 123
+        firstName:
+          type: string
+          description: The first name of the person
+          example: Dustin
+        lastName:
+          type: string
+          description: The last name of the person
+          example: Moskovitz
+        fullName:
+          type: string
+          description: The full name of the person
+          example: Dustin Moskovitz
+        emails:
+          description: Simple array of email addresses (deprecated - use emailAddresses)
+          type: array
+          items:
+            type: string
+          example:
+            - john.doe@example.com
+        emailAddresses:
+          description: Detailed email addresses with metadata
+          type: array
+          items:
+            $ref: '#/components/schemas/EmailAddress'
+        phones:
+          description: Simple array of phone numbers (deprecated - use phoneNumbers)
+          type: array
+          items:
+            type: string
+            example:
+              - +1 555-123-4567
+        phoneNumbers:
+          description: Detailed phone numbers with metadata
+          type: array
+          items:
+            $ref: '#/components/schemas/PhoneNumbers'
+        personId:
+          type: number
+          description: The unique person identifier in Lusha
+          example: 123456
+        location:
+          description: The location of the person
+          $ref: '#/components/schemas/LocationResponse'
+        jobTitle:
+          description: The job title of the person
+          $ref: '#/components/schemas/JobTitle'
+        socialLinks:
+          description: The social links of the person
+          $ref: '#/components/schemas/SocialLinks'
+        jobStartDate:
+          type: string
+          description: The start date at current position
+          example: '2020-01-01'
+        previousJob:
+          description: The previous job of the person
+          $ref: '#/components/schemas/PreviousJobResponse'
+        contactTags:
+          description: Tags associated with the contact
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactTag'
+        updateDate:
+          type: string
+          description: The last update date of the contact data
+          example: '2020-01-01'
+        required:
+          - companyId
+          - firstName
+          - lastName
+          - fullName
+    ContactResponse:
+      type: object
+      properties:
+        error:
+          description: The error of the contact
+          $ref: '#/components/schemas/ContactError'
+          nullable: true
+        isCreditCharged:
+          type: boolean
+          description: Indicates whether a credit charge was made for the contact
+          example: true
+        data:
+          description: The data of the contact
+          $ref: '#/components/schemas/Contact'
+      required:
+        - error
+        - isCreditCharged
+    SocialResponse:
+      type: object
+      properties:
+        linkedin:
+          type: string
+          description: The LinkedIn URL of the person
+          example: https://www.linkedin.com/in/dustin/
+        crunchbase:
+          type: string
+          description: The Crunchbase URL of the person
+          example: https://www.crunchbase.com/person/dustin-moskovitz
+        twitter:
+          type: string
+          description: The Twitter URL of the person
+          example: https://twitter.com/dustin
+        facebook:
+          type: string
+          description: The Facebook URL of the person
+          example: https://www.facebook.com/dustin
+    FundingDataRound:
+      type: object
+      properties:
+        announcedOn:
+          type: string
+          description: The announced on date of the funding data
+          example: '2020-01-01'
+        leadInvestors:
+          description: The lead investors of the funding data
+          example:
+            - Investor 1
+            - Investor 2
+          type: array
+          items:
+            type: string
+        currency:
+          type: string
+          description: The currency of the funding data
+          example: USD
+        title:
+          type: string
+          description: The title of the funding data
+          example: Series A
+        moneyRaised:
+          type: number
+          description: The money raised of the funding data
+          example: 1000000
+      required:
+        - currency
+        - title
+    FundingData:
+      type: object
+      properties:
+        totalRounds:
+          type: number
+          description: The total rounds of the funding data
+          example: 10
+        totalRoundsAmount:
+          type: number
+          description: The total rounds amount of the funding data
+          example: 1000000
+        currency:
+          type: string
+          description: The currency of the funding data
+          example: USD
+        isIpo:
+          type: boolean
+          description: Indicates whether the company is an IPO
+          example: true
+        lastFundingEventDate:
+          type: string
+          description: The last funding event date of the funding data
+          example: '2020-01-01'
+        lastFundingEventAmount:
+          type: number
+          description: The last funding event amount of the funding data
+          example: 1000000
+        lastFundingEventName:
+          type: string
+          description: The last funding event name of the funding data
+          example: Series A
+        rounds:
+          description: The rounds of the funding data
+          type: array
+          items:
+            $ref: '#/components/schemas/FundingDataRound'
+      required:
+        - totalRounds
+        - currency
+        - isIpo
+    BuyerIntent:
+      type: object
+      properties:
+        topicCount:
+          type: number
+          description: The topic count of the buyer intent
+          example: 10
+        detectedTopics:
+          description: The detected topics of the buyer intent
+          example:
+            - Software
+            - Sales
+          type: array
+          items:
+            type: string
+      required:
+        - topicCount
+        - detectedTopics
+    IndustryPrimaryGroupDetailsResponse:
+      type: object
+      properties:
+        sicCodes:
+          description: The SIC codes of the industry primary group
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanySic'
+        naicsCodes:
+          description: The NAICS codes of the industry primary group
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyNaics'
+    CompanyIndustryData:
+      type: object
+      properties:
+        mainIndustry:
+          type: string
+          description: The main industry of the company
+          example: Software
+        subIndustry:
+          type: string
+          description: The sub industry of the company
+          example: Sales
+      required:
+        - mainIndustry
+        - subIndustry
+    CompanyResponse:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the company
+          example: Lusha
+        description:
+          type: string
+          description: The description of the company
+          example: >-
+            Lusha is a company that provides a platform for companies to find
+            and connect with potential customers.
+        domains:
+          type: object
+          description: The domains of the company
+          properties:
+            homepage:
+              type: string
+              example: https://www.lusha.com
+            email:
+              type: string
+              example: contact@lusha.com
+        homepageUrl:
+          type: string
+          description: The homepage URL of the company
+          example: https://www.lusha.com
+        fqdn:
+          type: string
+          description: The FQDN of the company
+          example: lusha.com
+        location:
+          description: The location of the company
+          $ref: '#/components/schemas/LocationResponse'
+        companySize:
+          description: The size of the company
+          example:
+            - 100
+            - 1000
+          type: array
+          items:
+            type: number
+        revenueRange:
+          description: The revenue range of the company
+          example:
+            - 1000000
+            - 10000000
+          type: array
+          items:
+            type: number
+        industryPrimaryGroup:
+          type: string
+          description: The industry primary group of the company
+          example: Software
+        logoUrl:
+          type: string
+          description: The logo URL of the company
+          example: https://www.lusha.com/logo.png
+        social:
+          description: The social links of the company
+          $ref: '#/components/schemas/SocialResponse'
+        specialities:
+          description: The specialities of the company
+          example:
+            - Software
+            - Sales
+          type: array
+          items:
+            type: string
+        technologies:
+          description: The technologies of the company
+          example:
+            - JavaScript
+            - Python
+          type: array
+          items:
+            type: string
+        funding:
+          description: The funding data of the company
+          $ref: '#/components/schemas/FundingData'
+        industry:
+          description: The industry of the company
+          $ref: '#/components/schemas/CompanyIndustryData'
+        intent:
+          description: The intent of the company
+          $ref: '#/components/schemas/BuyerIntent'
+        industryPrimaryGroupDetails:
+          description: The industry primary group details of the company
+          $ref: '#/components/schemas/IndustryPrimaryGroupDetailsResponse'
+      required:
+        - name
+        - fqdn
+    BulkPersonResponse:
+      type: object
+      properties:
+        contacts:
+          type: object
+          description: The contacts of the bulk person output, keyed by contactId
+          additionalProperties:
+            $ref: '#/components/schemas/ContactResponse'
+        companies:
+          type: object
+          description: The companies of the bulk person output, keyed by companyId
+          additionalProperties:
+            $ref: '#/components/schemas/CompanyResponse'
+      required:
+        - contacts
+        - companies
+    ContactWithCompany:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Contact'
+        - type: object
+          properties:
+            company:
+              description: The company of the contact
+              $ref: '#/components/schemas/CompanyResponse'
+          required:
+            - company
+    ContactSingleResponse:
+      type: object
+      properties:
+        error:
+          description: The error of the contact
+          $ref: '#/components/schemas/ContactError'
+          nullable: true
+        isCreditCharged:
+          type: boolean
+          description: Indicates whether a credit charge was made for the contact
+          example: true
+        data:
+          description: The data of the contact and company
+          $ref: '#/components/schemas/ContactWithCompany'
+      required:
+        - error
+        - isCreditCharged
+    SingleContactResponse:
+      type: object
+      properties:
+        contact:
+          description: The contact response object
+          $ref: '#/components/schemas/ContactSingleResponse'
+      required:
+        - contact
+    UsageStats:
+      type: object
+      properties:
+        used:
+          type: number
+          description: >-
+            The number of credits that have been consumed from the total
+            available credits
+          example: 10
+        total:
+          type: number
+          description: The initial amount of credits your account started with
+          example: 100
+        remaining:
+          type: number
+          description: >-
+            The number of credits left after subtracting the used credits from
+            the total
+          example: 90
+      required:
+        - used
+        - total
+        - remaining
+    AccountUsageStatsResponse:
+      type: object
+      properties:
+        usage:
+          type: object
+          description: The usage stats for the account
+          additionalProperties:
+            $ref: '#/components/schemas/UsageStats'
+      required:
+        - usage
+    CompanyBulkRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: >-
+            A unique sequential ID associated with each company. This ID is used
+            to correlate the provided company object with the API response
+          example: '1'
+        domain:
+          type: string
+          description: The domain name associated with the company
+          example: lusha.com
+        fqdn:
+          type: string
+          description: The Fully Qualified Domain Name (FQDN) of the company.
+        name:
+          type: string
+          description: The name of the company
+          example: Lusha
+        companyId:
+          type: string
+          description: >-
+            A unique identifier for a Lusha company. Note: Values may be removed
+            or merged. No management system exists to log historical changes for
+            companyId. This field is intended for deprecation in the future.
+          example: '1234567890'
+      required:
+        - id
+    CompaniesBulkRequest:
+      type: object
+      properties:
+        companies:
+          description: The list of companies to search
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyBulkRequest'
+        signals:
+          type: array
+          description: >
+            Array of signal types to retrieve for the companies.
+
+            - `allSignals`: All available signal types
+
+            - `headcountGrowth`: Company size changes
+
+            - `newJobsOpen`: New job openings
+
+            - `newsEvent`: Company related events
+
+
+            > See [Signal
+            Filters](https://docs.lusha.com/apis/openapi/signal-filters/getsignaloptions)
+            for complete details on available signals and their categories
+          items:
+            type: string
+            enum:
+              - allSignals
+              - headcountGrowth
+              - newJobsOpen
+              - newsEvent
+          example:
+            - headcountGrowth
+            - newJobsOpen
+        signalsStartDate:
+          type: string
+          format: date
+          description: >
+            Start date for signal retrieval in YYYY-MM-DD format. Defaults to 6
+            months ago if not specified.
+          example: '2025-03-01'
+        partialCompany:
+          type: boolean
+          description: |
+            Expand coverage with partial company profiles
+          default: true
+          example: false
+      required:
+        - companies
+    CompanySic:
+      type: object
+      properties:
+        sicCodes:
+          type: number
+          example: 1234
+        description:
+          type: string
+          example: Software Publishing
+      required:
+        - sic
+        - description
+    CompanyNaics:
+      type: object
+      properties:
+        naicsCodes:
+          type: number
+          example: 541511
+        description:
+          type: string
+          example: Custom Computer Programming Services
+      required:
+        - naics
+        - description
+    CompanyIndustryPrimaryGroupDetails:
+      type: object
+      properties:
+        sicCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanySic'
+        naicsCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyNaics'
+    CompanyFundingRound:
+      type: object
+      properties:
+        currency:
+          type: string
+          example: USD
+          description: Currency of the funding round
+        roundAmount:
+          type: number
+          example: 205000000
+          description: Amount raised in the round
+        roundType:
+          type: string
+          example: Private Equity Round
+          description: Type of funding round
+        roundDate:
+          type: string
+          example: Nov 10, 2021
+          description: Date of the funding round
+      required:
+        - currency
+        - roundAmount
+        - roundType
+        - roundDate
+    CompanyFunding:
+      type: object
+      properties:
+        rounds:
+          description: List of funding rounds
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyFundingRound'
+        totalRounds:
+          type: number
+          example: 2
+          description: Total number of rounds
+        totalRoundsAmount:
+          type: number
+          example: 245000000
+          description: Total amount raised across all rounds
+        currency:
+          type: string
+          example: USD
+          description: Currency used
+        isIpo:
+          type: boolean
+          example: false
+          description: Whether the company has gone public
+        lastRoundType:
+          type: string
+          example: Private Equity Round
+          description: Type of the last funding round
+        lastRoundAmount:
+          type: number
+          example: 205000000
+          description: Amount of the last funding round
+        lastRoundDate:
+          type: string
+          example: Nov 10, 2021
+          description: Date of the last funding round
+      required:
+        - totalRounds
+        - currency
+        - isIpo
+    CompanyIntentTopicMetadata:
+      type: object
+      properties:
+        topicScore:
+          type: number
+          example: 83
+          description: Relevance score for the intent topic
+        topicTrend:
+          type: string
+          example: '-5'
+          description: Trend of the topic (e.g., +1, -5, New)
+      required:
+        - topicScore
+        - topicTrend
+    CompanyIntentTopic:
+      type: object
+      properties:
+        topicName:
+          type: string
+          example: Remote Sales
+          description: Name of the intent topic
+        metadata:
+          $ref: '#/components/schemas/CompanyIntentTopicMetadata'
+      required:
+        - topicName
+        - metadata
+    CompanyIntent:
+      type: object
+      properties:
+        detectedTopics:
+          description: Detected intent topics
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyIntentTopic'
+        topicCount:
+          type: number
+          example: 6
+          description: Number of topics detected
+      required:
+        - detectedTopics
+        - topicCount
+    CompanyTechnology:
+      type: object
+      properties:
+        name:
+          type: string
+          example: salesforce
+          description: Technology name used by the company
+      required:
+        - name
+    CompanyBulkResponse:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 33222678
+          description: A unique identifier for the Lusha company.
+        lushaCompanyId:
+          type: string
+          example: '16303253'
+          description: Lusha's internal company identifier.
+        name:
+          type: string
+          example: Lusha
+          description: The name of the company.
+        companySize:
+          example:
+            - 201
+            - 500
+          description: The size range of the company, based on number of employees.
+          type: array
+          items:
+            type: number
+        revenueRange:
+          example:
+            - 10000000
+            - 50000000
+          description: The company's revenue range.
+          type: array
+          items:
+            type: number
+        fqdn:
+          type: string
+          example: www.lusha.com
+          description: The Fully Qualified Domain Name (FQDN) of the company.
+        founded:
+          type: string
+          example: '2016'
+          description: The date the company was founded.
+        description:
+          type: string
+          example: Lusha is the sales intelligence platform...
+          description: A brief description of the company.
+        logoUrl:
+          type: string
+          example: https://logo.lusha.co/logo.jpg
+          description: The URL of the company's logo.
+        industryPrimaryGroupDetails:
+          $ref: '#/components/schemas/CompanyIndustryPrimaryGroupDetails'
+          description: >-
+            Primary industry classification details including SIC and NAICS
+            codes.
+        linkedin:
+          type: string
+          example: https://www.linkedin.com/company/lushadata
+          description: The LinkedIn URL of the company.
+        mainIndustry:
+          type: string
+          example: Technology, Information & Media
+          description: The main industry category of the company.
+        subIndustry:
+          type: string
+          example: Software Development
+          description: The specific sub-industry of the company.
+        city:
+          type: string
+          example: Boston
+          description: The city where the company is located.
+        state:
+          type: string
+          example: Massachusetts
+          description: The state where the company is located.
+        country:
+          type: string
+          example: United States
+          description: The country where the company is located.
+        countryIso2:
+          type: string
+          example: US
+          description: The ISO 3166-1 alpha-2 country code.
+        continent:
+          type: string
+          example: North America
+          description: The continent where the company is located.
+        rawLocation:
+          type: string
+          example: 800 Boylston St; Suite 1410; Boston, Massachusetts 02199, US
+          description: The full address of the company.
+        crunchbase:
+          type: string
+          example: https://www.crunchbase.com/organization/lusha
+          description: The Crunchbase URL of the company.
+        specialities:
+          type: array
+          items:
+            type: string
+          example:
+            - data accuracy
+            - sales intelligence
+          description: Company specialties and focus areas.
+        funding:
+          $ref: '#/components/schemas/CompanyFunding'
+          description: Company funding information.
+        intent:
+          $ref: '#/components/schemas/CompanyIntent'
+          description: Company intent signals and topics.
+        technologies:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyTechnology'
+          description: Technologies used by the company.
+    ContactSignalsByIdRequest:
+      type: object
+      required:
+        - contactIds
+        - signals
+      properties:
+        contactIds:
+          type: array
+          description: List of contact IDs to retrieve signals for
+          minItems: 1
+          maxItems: 100
+          items:
+            type: integer
+          example:
+            - 115889
+        signals:
+          type: array
+          description: Types of signals to retrieve
+          items:
+            type: string
+            enum:
+              - allSignals
+              - promotion
+              - companyChange
+          example:
+            - promotion
+            - companyChange
+        startDate:
+          type: string
+          format: date
+          description: Start date for signal retrieval (YYYY-MM-DD format)
+          example: '2025-03-01'
+    ContactSignalsSearchRequest:
+      type: object
+      required:
+        - signals
+        - contacts
+      properties:
+        contacts:
+          type: array
+          description: List of contact identifiers to search for
+          items:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: string
+                description: >-
+                  A unique sequential ID to associate with the contact object in
+                  the API response
+                example: '12345'
+              social_link:
+                type: string
+                format: uri
+                description: LinkedIn profile URL
+                example: https://www.linkedin.com/in/ron-nabet
+              full_name:
+                type: string
+                description: Full name of the contact
+                example: Ron Nabet
+              email:
+                type: string
+                format: email
+                description: Email address
+                example: dustin@lusha.com
+              companies:
+                type: array
+                description: Company associations
+                items:
+                  type: object
+                  required:
+                    - name
+                    - domain
+                  properties:
+                    name:
+                      type: string
+                      description: Company name
+                      example: Lusha
+                    domain:
+                      type: string
+                      description: Company domain (FQDN, not URL)
+                      example: lusha.com
+                    is_current:
+                      type: boolean
+                      description: Whether this is the current company
+                      default: true
+                      example: true
+        signals:
+          type: array
+          description: Types of signals to retrieve
+          items:
+            type: string
+            enum:
+              - allSignals
+              - promotion
+              - companyChange
+          example:
+            - promotion
+            - companyChange
+        startDate:
+          type: string
+          format: date
+          description: Start date for signal retrieval (YYYY-MM-DD format)
+          example: '2025-01-01'
+    ContactSignal:
+      type: object
+      properties:
+        personId:
+          type: string
+          description: Contact person ID
+          example: '115889'
+        currentCompanyId:
+          type: integer
+          description: Current company ID
+          example: 8217
+        currentCompanyName:
+          type: string
+          description: Current company name
+          example: Callaway Golf
+        currentDepartments:
+          type: string
+          description: Current department
+          example: R&D
+        currentSeniorityLabel:
+          type: string
+          description: Current seniority level
+          example: c-suite
+        currentTitle:
+          type: string
+          description: Current job title
+          example: Senior Manager, IT Solutions
+        signalDate:
+          type: string
+          format: date
+          description: Date when the signal occurred
+          example: '2025-05-01'
+        previousCompanyName:
+          type: string
+          description: Previous company name (for company change signals)
+          example: Previous Corp
+        previousDomain:
+          type: string
+          description: Previous company's homepage domain
+          example: nextgen.com
+        currentDomain:
+          type: string
+          description: Current company's homepage domain
+          example: vendavo.com
+    ContactSignalData:
+      type: object
+      properties:
+        personId:
+          type: string
+          description: Contact person ID
+          example: '115889'
+        companyChange:
+          type: array
+          description: Company change signals
+          items:
+            $ref: '#/components/schemas/ContactSignal'
+        promotion:
+          type: array
+          description: Promotion signals
+          items:
+            $ref: '#/components/schemas/ContactSignal'
+    ContactSignalsByIdResponse:
+      type: object
+      properties:
+        contacts:
+          type: object
+          description: Map of contact IDs to their signals
+          additionalProperties:
+            $ref: '#/components/schemas/ContactSignalData'
+        endDate:
+          type: string
+          format: date
+          description: End date of the signal period
+          example: '2025-07-31'
+        startDate:
+          type: string
+          format: date
+          description: Start date of the signal period
+          example: '2025-03-01'
+        creditCharged:
+          type: integer
+          description: Number of credits charged for this request
+          example: 2
+    ContactSignalsSearchResponse:
+      type: object
+      properties:
+        contacts:
+          type: object
+          description: Map of user-provided IDs to contact signals
+          additionalProperties:
+            type: object
+            properties:
+              personId:
+                type: string
+                description: Contact person ID
+                example: '115889'
+              companyChange:
+                type: array
+                description: Company change signals
+                items:
+                  $ref: '#/components/schemas/ContactSignal'
+              promotion:
+                type: array
+                description: Promotion signals
+                items:
+                  $ref: '#/components/schemas/ContactSignal'
+        endDate:
+          type: string
+          format: date
+          description: End date of the signal period
+          example: '2025-07-31'
+        startDate:
+          type: string
+          format: date
+          description: Start date of the signal period
+          example: '2025-01-01'
+        creditCharged:
+          type: integer
+          description: Number of credits charged for this request
+          example: 2
+    CompanySignalsByIdRequest:
+      type: object
+      required:
+        - companyIds
+        - signals
+      properties:
+        companyIds:
+          type: array
+          description: List of company IDs to retrieve signals for
+          minItems: 1
+          maxItems: 100
+          items:
+            type: integer
+          example:
+            - 3416
+        signals:
+          type: array
+          description: Types of signals to retrieve
+          items:
+            type: string
+            enum:
+              - allSignals
+              - headcountGrowth
+              - newJobsOpen
+              - newsEvent
+          example:
+            - headcountGrowth
+            - newJobsOpen
+            - newsEvent
+        startDate:
+          type: string
+          format: date
+          description: Start date for signal retrieval (YYYY-MM-DD format)
+          example: '2025-03-01'
+    CompanySignalsSearchRequest:
+      type: object
+      required:
+        - companies
+        - signals
+      properties:
+        companies:
+          type: array
+          description: List of company identifiers to search for
+          minItems: 1
+          maxItems: 100
+          items:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: string
+                description: >-
+                  A unique sequential ID to associate with the company object in
+                  the API response
+                example: '12345'
+              name:
+                type: string
+                description: Company name
+                example: Lusha
+              domain:
+                type: string
+                description: Company domain
+                example: lusha.com
+        signals:
+          type: array
+          description: Types of signals to retrieve
+          items:
+            type: string
+            enum:
+              - allSignals
+              - headcountGrowth
+              - newJobsOpen
+              - newsEvent
+          example:
+            - headcountGrowth
+            - newJobsOpen
+            - newsEvent
+        startDate:
+          type: string
+          format: date
+          description: Start date for signal retrieval (YYYY-MM-DD format)
+          example: '2025-01-01'
+    CompanySignal:
+      type: object
+      properties:
+        companyId:
+          type: string
+          description: Company ID
+          example: '3416'
+        signalType:
+          type: string
+          description: Type of signal
+          enum:
+            - new_jobs_count
+            - open_jobs_count
+            - size_increase
+          example: new_jobs_count
+        score:
+          type: string
+          description: Signal strength/importance
+          enum:
+            - high
+            - medium
+            - low
+          example: high
+        signalDate:
+          type: string
+          format: date
+          description: Date when the signal occurred
+          example: '2025-06-15'
+        historicalAvg:
+          type: number
+          description: Historical average value
+          example: 15.5
+        newValue:
+          type: number
+          description: New value after change
+          example: 25
+        oldValue:
+          type: number
+          description: Previous value before change
+          example: 10
+    CompanyNewsEventSignal:
+      type: object
+      properties:
+        companyId:
+          type: integer
+          description: Company ID
+          example: 9506502
+        eventType:
+          type: string
+          description: Specific type of news event
+          example: sued
+        eventCategory:
+          type: string
+          description: High-level category of the news event
+          enum:
+            - Business Milestones
+            - Corporate Expansion
+            - Financial Growth
+            - People & Leadership
+            - Recognition
+            - Risk
+          example: Risk
+        eventEffectiveDate:
+          type: string
+          format: date
+          nullable: true
+          description: Date when the event occurred or will occur
+          example: '2025-10-28'
+        eventSummary:
+          type: string
+          description: Brief summary of the news event
+          example: Cameo filed suit against OpenAI on Oct 28th '25.
+        articleSentence:
+          type: string
+          description: Relevant sentence from the source article
+          example: >-
+            Cameo, the startup known for personalized celebrity videos, filed a
+            lawsuit Tuesday against OpenAI...
+        articleUrl:
+          type: string
+          format: uri
+          description: URL of the source article
+          example: >-
+            https://www.businessinsider.com/cameo-lawsuit-openai-copyright-infringement-sora-app-2025-10
+        articleTitle:
+          type: string
+          description: Title of the source article
+          example: >-
+            Cameo sues OpenAI for using 'Cameo' as the name for its virtual
+            likeness function
+        articlePublishedDate:
+          type: string
+          format: date
+          description: Publication date of the source article
+          example: '2025-10-29'
+    CompanySignalData:
+      type: object
+      properties:
+        companyId:
+          type: string
+          description: Company ID
+          example: '3416'
+        newJobsOpen:
+          type: array
+          description: New job opening signals
+          items:
+            $ref: '#/components/schemas/CompanySignal'
+        headcountGrowth:
+          type: array
+          description: Headcount growth signals
+          items:
+            $ref: '#/components/schemas/CompanySignal'
+        newsEvent:
+          type: array
+          description: Company news events across various categories
+          items:
+            $ref: '#/components/schemas/CompanyNewsEventSignal'
+    CompanySignalsByIdResponse:
+      type: object
+      properties:
+        companies:
+          type: object
+          description: Map of company IDs to their signals
+          additionalProperties:
+            $ref: '#/components/schemas/CompanySignalData'
+        endDate:
+          type: string
+          format: date
+          description: End date of the signal period
+          example: '2025-07-31'
+        startDate:
+          type: string
+          format: date
+          description: Start date of the signal period
+          example: '2025-01-01'
+        creditCharged:
+          type: integer
+          description: Number of credits charged for this request
+          example: 3
+    ContactRecommendationsRequestContacts:
+      type: object
+      properties:
+        personId:
+          type: string
+          description: Person ID to get recommendations for
+          example: '1234567890'
+        companyId:
+          type: string
+          description: Company ID to get recommendations for
+          example: '1234567890'
+      required:
+        - personId
+        - companyId
+    ContactRecommendationsRequest:
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: Request ID for getting more results (optional)
+          example: 123e4567-e89b-12d3-a456-426614174000
+        contacts:
+          description: Contacts to get recommendations by
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactRecommendationsRequestContacts'
+        exclude:
+          description: Contact IDs to exclude from results
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactRecommendationsRequestContacts'
+        limit:
+          type: number
+          description: Number of recommendations to return (max 25)
+          minimum: 5
+          maximum: 25
+          default: 25
+      required:
+        - contacts
+    ContactRecommendation:
+      type: object
+      properties:
+        personId:
+          type: string
+          description: Contact ID
+          example: '12345'
+        companyId:
+          type: string
+          description: Company ID
+          example: '12345'
+        name:
+          type: string
+          description: Contact name
+          example: John Doe
+        jobTitle:
+          type: string
+          description: Contact job title
+          example: Software Engineer
+        companyName:
+          type: string
+          description: Contact company name
+          example: Google
+      required:
+        - personId
+        - companyId
+        - name
+        - jobTitle
+        - companyName
+    ContactRecommendationsResponse:
+      type: object
+      properties:
+        contacts:
+          description: Array of contact recommendations
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactRecommendation'
+        requestId:
+          type: string
+          description: Request ID for getting more results
+          example: req_123456789
+        count:
+          type: number
+          description: Total number of recommendations returned
+          example: 10
+        creditsCharged:
+          type: number
+          description: Number of credits charged for the recommendations
+          example: 3
+      required:
+        - contacts
+        - requestId
+        - count
+        - creditsCharged
+    CompanyRecommendationsRequestCompanies:
+      type: object
+      properties:
+        companyId:
+          type: string
+          description: Company ID to get recommendations for
+          example: '1234567890'
+      required:
+        - companyId
+    CompanyRecommendationsRequest:
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: Request ID for getting more results (optional)
+          example: 123e4567-e89b-12d3-a456-426614174000
+        companies:
+          description: Company IDs to get recommendations by
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyRecommendationsRequestCompanies'
+        exclude:
+          description: Company IDs to exclude from results
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyRecommendationsRequestCompanies'
+        limit:
+          type: number
+          description: Number of recommendations to return (max 25)
+          minimum: 5
+          maximum: 25
+          default: 25
+      required:
+        - companies
+    CompanyRecommendation:
+      type: object
+      properties:
+        companyId:
+          type: string
+          description: Company ID
+          example: '12345'
+        name:
+          type: string
+          description: Company name
+          example: Lusha
+        fqdn:
+          type: string
+          description: Company FQDN
+          example: lusha.com
+        description:
+          type: string
+          description: Company description
+          example: Example company description
+      required:
+        - companyId
+        - name
+        - fqdn
+        - description
+    CompanyRecommendationsResponse:
+      type: object
+      properties:
+        companies:
+          description: Array of company recommendations
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyRecommendation'
+        requestId:
+          type: string
+          description: Request ID for getting more results
+          example: req_123456789
+        count:
+          type: number
+          description: Total number of recommendations returned
+          example: 10
+        creditsCharged:
+          type: number
+          description: Number of credits charged for the recommendations
+          example: 3
+      required:
+        - companies
+        - requestId
+        - count
+        - creditsCharged
